@@ -1,0 +1,31 @@
+# DAMOV2 global configuration. Paths may be absolute or relative to the repo
+# root. Consumed by scripts/*.py.
+
+# --- Simulator ------------------------------------------------------------
+gem5_binary: /opt/gem5/build/X86/gem5.opt      # path to your gem5.opt
+gem5_config: gem5/configs/damov_se.py
+ramulator_config: gem5/ramulator2/HMC-config.yaml
+cpu_type: O3                                   # O3 (out-of-order) or Timing (in-order)
+
+# --- DAMOV2 C++ tools -----------------------------------------------------
+tools_dir: build                               # directory holding damov-locality/stats/classify
+
+# --- Experiment sweep (Table 1) ------------------------------------------
+output_root: out
+cores: [1, 4, 16, 64, 256]
+configs: [host_ooo, host_prefetch, ndp]
+classify_config: host_ooo                      # config whose sweep drives classification
+
+# --- Step 2: locality analysis -------------------------------------------
+locality:
+  spatial_window: 64
+  temporal_window: 64
+  granularity: 8         # bytes (word granularity, per the paper)
+
+# --- Step 3: classification thresholds (validated, paper §3.5.1) ----------
+thresholds:
+  temporal_locality: 0.48
+  lfmr: 0.56
+  mpki: 11.0
+  ai: 8.5
+  trend_delta: 0.10

@@ -38,3 +38,10 @@ env/
 .idea/
 *.swp
 *.swo
+
+# DAMOV2 simulator outputs & downloaded workloads
+out/
+m5out/
+*.zsim.out
+*.proto.gz
+workloads/

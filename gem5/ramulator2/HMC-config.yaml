@@ -1,0 +1,52 @@
+# DAMOV2 3D-stacked main-memory configuration for Ramulator2.
+#
+# The original DAMOV modeled a Hybrid Memory Cube (HMC v2.0): 32 vaults,
+# 8 banks/vault, 256 B row buffer, 8 GB, DRAM @166 MHz, 4 links @8 GHz
+# (Table 1). Ramulator2 does not ship an HMC standard, so DAMOV2 models the
+# 3D-stacked / near-data memory with HBM2 — the modern equivalent used by
+# contemporary NDP studies — sized to match the HMC vault/bank parallelism and
+# the ~8 GB capacity of the paper's setup.
+#
+# When driven by gem5 (the DAMOV2 flow), gem5 is the frontend and only the
+# `MemorySystem` block below is used; the `Frontend` block lets the same file
+# also run under Ramulator2's standalone trace frontend for validation.
+
+Frontend:
+  impl: SimpleO3
+  clock_ratio: 6
+  num_expected_insts: 0
+  Translation:
+    impl: RandomTranslation
+    max_addr: 2147483648   # 8 GB address space seen by the frontend
+
+MemorySystem:
+  impl: GenericDRAM
+  clock_ratio: 3           # ~ DRAM interface clock relative to controller
+
+  DRAM:
+    impl: HBM2
+    org:
+      preset: HBM2_8Gb
+      density: 8192         # per-channel density (Mb) -> ~8 GB across channels
+      channel: 8            # 8 pseudo-channels ~ HMC's 32-vault parallelism
+      pseudochannel: 2
+      rank: 1
+      bankgroup: 4
+      bank: 4               # 16 banks/channel -> high bank-level parallelism
+      row: 16384
+      column: 64            # 64 columns * 32 B = ~256 B row-buffer granularity
+    timing:
+      preset: HBM2_2Gbps    # ~8 GHz link-equivalent bandwidth per channel
+
+  Controller:
+    impl: Generic
+    Scheduler:
+      impl: FRFCFS          # first-ready, first-come-first-serve (open-page)
+    RefreshManager:
+      impl: AllBank
+    RowPolicy:
+      impl: OpenRowPolicy   # open-page policy (Table 1)
+    plugins: []
+
+  AddrMapper:
+    impl: RoBaRaCoCh        # HMC-like: interleave lines across banks/vaults

@@ -1,0 +1,25 @@
+# Example DAMOV2 benchmark descriptor (a modern "command file").
+#
+# Each entry describes one hot function (a region of interest) to characterize.
+# The binary must be compiled against hooks/damov_hooks.h with -DDAMOV_USE_M5OPS
+# (or -DDAMOV_USE_MAGIC) so its ROI is delimited for gem5. `class` records the
+# expected DAMOV class from Table 2 of the paper (informational, for validation).
+
+suite: stream
+functions:
+  - name: Add
+    binary: workloads/STREAM/stream_omp
+    options: ""
+    class: 1a            # STREAM Add -> DRAM bandwidth-bound
+  - name: Copy
+    binary: workloads/STREAM/stream_omp
+    options: ""
+    class: 1a
+  - name: Scale
+    binary: workloads/STREAM/stream_omp
+    options: ""
+    class: 1a
+  - name: Triad
+    binary: workloads/STREAM/stream_omp
+    options: ""
+    class: 1a
