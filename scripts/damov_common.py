@@ -112,6 +112,20 @@ def load_config(path=None):
     cfg.setdefault("classify_config", "host_ooo")
     cfg.setdefault("cpu_type", "O3")
     cfg.setdefault("tools_dir", "build")
+
+    # Environment overrides (used by the SLURM scripts so paths need not be
+    # hard-coded in configs/damov.yaml on shared clusters).
+    env_map = {
+        "DAMOV2_GEM5_BIN": "gem5_binary",
+        "DAMOV2_GEM5_CONFIG": "gem5_config",
+        "DAMOV2_RAMULATOR_CONFIG": "ramulator_config",
+        "DAMOV2_CPU_TYPE": "cpu_type",
+        "DAMOV2_TOOLS_DIR": "tools_dir",
+        "DAMOV2_OUTPUT_ROOT": "output_root",
+    }
+    for env, key in env_map.items():
+        if os.environ.get(env):
+            cfg[key] = os.environ[env]
     return cfg
 
 

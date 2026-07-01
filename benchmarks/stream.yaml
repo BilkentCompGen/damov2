@@ -1,25 +1,25 @@
-# Example DAMOV2 benchmark descriptor (a modern "command file").
+# DAMOV2 benchmark descriptor for the instrumented STREAM (workloads/STREAM).
 #
-# Each entry describes one hot function (a region of interest) to characterize.
-# The binary must be compiled against hooks/damov_hooks.h with -DDAMOV_USE_M5OPS
-# (or -DDAMOV_USE_MAGIC) so its ROI is delimited for gem5. `class` records the
-# expected DAMOV class from Table 2 of the paper (informational, for validation).
+# Build the binary first:  cd workloads/STREAM && make GEM5_ROOT=/opt/gem5
+# `options` selects the kernel to profile and the array size. The paper uses
+# 50,000,000 elements (Table 2); that is ~1.2 GB and slow to simulate, so the
+# default here is a simulation-friendly 8,000,000. Raise it on capable nodes.
 
 suite: stream
 functions:
   - name: Add
     binary: workloads/STREAM/stream_omp
-    options: ""
+    options: "add 8000000"
     class: 1a            # STREAM Add -> DRAM bandwidth-bound
   - name: Copy
     binary: workloads/STREAM/stream_omp
-    options: ""
+    options: "copy 8000000"
     class: 1a
   - name: Scale
     binary: workloads/STREAM/stream_omp
-    options: ""
+    options: "scale 8000000"
     class: 1a
   - name: Triad
     binary: workloads/STREAM/stream_omp
-    options: ""
+    options: "triad 8000000"
     class: 1a

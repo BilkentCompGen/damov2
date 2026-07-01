@@ -1,0 +1,43 @@
+# DAMOV2 SLURM environment — EDIT THIS for your cluster, then it is sourced by
+# every slurm/*.sh script. Nothing here submits jobs; it only sets paths and
+# resource defaults.
+
+# --- Repo & tool locations -------------------------------------------------
+# Auto-detect the repo root (this file lives in <root>/slurm/).
+export DAMOV2_ROOT="${DAMOV2_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+export PYTHON="${PYTHON:-python3}"
+
+# DAMOV2 C++ tools (built by 00_prepare.sh into $DAMOV2_ROOT/build).
+export DAMOV2_TOOLS_DIR="${DAMOV2_TOOLS_DIR:-$DAMOV2_ROOT/build}"
+
+# --- Simulators ------------------------------------------------------------
+# gem5 (built with the Ramulator2 memory model — see gem5/README.md).
+export GEM5_ROOT="${GEM5_ROOT:-/opt/gem5}"
+export DAMOV2_GEM5_BIN="${DAMOV2_GEM5_BIN:-$GEM5_ROOT/build/X86/gem5.opt}"
+export DAMOV2_GEM5_CONFIG="${DAMOV2_GEM5_CONFIG:-$DAMOV2_ROOT/gem5/configs/damov_se.py}"
+
+# Ramulator2 memory config (3D-stacked HMC-equivalent by default).
+export DAMOV2_RAMULATOR_CONFIG="${DAMOV2_RAMULATOR_CONFIG:-$DAMOV2_ROOT/gem5/ramulator2/HMC-config.yaml}"
+
+# Core model for the sweep: O3 (out-of-order) or Timing (in-order).
+export DAMOV2_CPU_TYPE="${DAMOV2_CPU_TYPE:-O3}"
+
+# Where gem5 outputs and metric tables are written.
+export DAMOV2_OUTPUT_ROOT="${DAMOV2_OUTPUT_ROOT:-$DAMOV2_ROOT/out}"
+
+# --- Which benchmark descriptor to characterize ----------------------------
+export DAMOV2_DESCRIPTOR="${DAMOV2_DESCRIPTOR:-$DAMOV2_ROOT/benchmarks/stream.yaml}"
+export DAMOV2_SUITE="${DAMOV2_SUITE:-stream}"
+
+# --- SLURM resource defaults (override on the sbatch/submit command line) ---
+# gem5 SE simulation is host-single-threaded; memory grows with the number of
+# SIMULATED cores (a 256-core run needs far more host RAM than a 1-core run).
+export SLURM_PARTITION="${SLURM_PARTITION:-cpu}"
+export SLURM_ACCOUNT="${SLURM_ACCOUNT:-}"          # set if your site requires it
+export SLURM_TIME="${SLURM_TIME:-24:00:00}"
+export SLURM_MEM="${SLURM_MEM:-16G}"               # per array task; raise for 256-core
+export SLURM_CPUS="${SLURM_CPUS:-2}"               # host cores per gem5 process
+export SLURM_MAX_PARALLEL="${SLURM_MAX_PARALLEL:-32}"  # array throttle (%N)
+
+# Optional environment modules — uncomment/edit for your site.
+# module load gcc/12 cmake/3.27 python/3.11 2>/dev/null || true
