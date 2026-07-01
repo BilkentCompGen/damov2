@@ -20,7 +20,9 @@ import damov_common as dc
 
 
 def find_ramulator_stats(outdir):
-    for name in ("ramulator2.stats", "ramulator.stats", "mem.stats"):
+    # Ramulator2's gem5 wrapper writes its stats to ramulator_stats.yaml in the
+    # gem5 output directory (alongside stats.txt).
+    for name in ("ramulator_stats.yaml", "ramulator2.stats", "ramulator.stats"):
         p = os.path.join(outdir, name)
         if os.path.exists(p):
             return p

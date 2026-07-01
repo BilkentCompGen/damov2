@@ -25,7 +25,11 @@ import damov_common as dc
 def gem5_command(cfg, job):
     gem5 = dc.abspath(cfg["gem5_binary"])
     script = dc.abspath(cfg["gem5_config"])
-    ram = dc.abspath(cfg["ramulator_config"])
+    # ramulator_config is either a preset name (hmc/hbm2/ddr4) or a config file;
+    # only turn it into an absolute path when it actually names a file.
+    ram = cfg["ramulator_config"]
+    if os.path.exists(dc.abspath(ram)):
+        ram = dc.abspath(ram)
     outdir = job["output_dir"]
     cmd = [
         gem5, f"--outdir={outdir}", script,
@@ -37,6 +41,8 @@ def gem5_command(cfg, job):
         "--options", job.get("options", ""),
         "--output-dir", outdir,
     ]
+    if cfg.get("ramulator_home"):
+        cmd += ["--ramulator-home", dc.abspath(cfg["ramulator_home"])]
     if job.get("input"):
         cmd += ["--input", dc.abspath(job["input"])]
     if job["stage"] == "trace":

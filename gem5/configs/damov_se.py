@@ -33,7 +33,8 @@ from m5.objects import (
 )
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import caches  # noqa: E402  (local module, see gem5/configs/caches.py)
+import caches           # noqa: E402  (local module, see gem5/configs/caches.py)
+import ramulator2_mem   # noqa: E402  (builds the Ramulator2 config string)
 
 
 # --------------------------------------------------------------------------- #
@@ -49,7 +50,13 @@ def parse_args():
     p.add_argument("--freq", default="2.4GHz")
     p.add_argument("--mem-size", default="8GB")
     p.add_argument("--ramulator-config", required=True,
-                   help="path to the Ramulator2 YAML config")
+                   help="Ramulator2 memory: preset name (hmc/hbm2/ddr4) or a "
+                        ".py DSL / .yaml / .json config path")
+    p.add_argument("--ramulator-home", default="",
+                   help="Ramulator2 checkout (default: external/ramulator2, or "
+                        "$RAMULATOR2_HOME)")
+    p.add_argument("--mem-channels", type=int, default=8,
+                   help="number of Ramulator2 memory channels")
     p.add_argument("--cmd", required=True, help="workload binary")
     p.add_argument("--options", default="", help="workload arguments")
     p.add_argument("--input", default="", help="stdin redirect file")
@@ -150,16 +157,24 @@ def connect_caches(system, args):
 # Ramulator2 main memory (replaces the original DAMOV's Ramulator v1)
 # --------------------------------------------------------------------------- #
 def connect_memory(system, args, mem_port):
+    # Ramulator2 v2.1 ships a gem5 wrapper (an AbstractMemory SimObject named
+    # `Ramulator2`) that takes a single `ramulator_config` JSON string. That
+    # string is produced from Ramulator2's Python DSL by ramulator2_mem.
     try:
         from m5.objects import Ramulator2
     except ImportError:
-        m5.fatal("This gem5 build lacks the Ramulator2 memory model. Rebuild "
-                 "gem5 with Ramulator2 enabled (see gem5/README.md).")
+        m5.fatal("This gem5 build lacks the Ramulator2 memory model. Copy "
+                 "external/ramulator2/resources/gem5_wrappers/ into "
+                 "gem5/src/mem/ramulator2/ and rebuild (see gem5/README.md).")
+
+    cfg_string = ramulator2_mem.build_config_string(
+        args.ramulator_config,
+        channels=args.mem_channels,
+        ramulator_home=(args.ramulator_home or None))
+
     mem_range = AddrRange(args.mem_size)
     system.mem_ranges = [mem_range]
-    mem = Ramulator2()
-    mem.config_path = os.path.abspath(args.ramulator_config)
-    mem.range = mem_range
+    mem = Ramulator2(ramulator_config=cfg_string, range=mem_range)
     system.mem_ctrl = mem
     mem.port = mem_port.mem_side_ports
 

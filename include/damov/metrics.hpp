@@ -63,9 +63,11 @@ struct StatPatterns {
     std::vector<std::string> fp_ops       = {"num_fp_alu_accesses",
                                              "committedInstType::FloatAdd",
                                              "committedInstType::FloatMult"};
-    std::vector<std::string> dram_bw      = {"ramulator2.*bandwidth", "ramulator2.total_bandwidth"};
-    std::vector<std::string> dram_reads   = {"ramulator2.read_requests", "ramulator2.reads"};
-    std::vector<std::string> dram_writes  = {"ramulator2.write_requests", "ramulator2.writes"};
+    // Ramulator2 (ramulator_stats.yaml) controller counters, flattened and
+    // prefixed with "ramulator2." by RawStats::loadRamulator2.
+    std::vector<std::string> dram_bw      = {"avg_read_latency"};
+    std::vector<std::string> dram_reads   = {"num_read_reqs", "read_requests", "reads"};
+    std::vector<std::string> dram_writes  = {"num_write_reqs", "write_requests", "writes"};
 
     // Load pattern overrides from a "key = a,b,c" text file (keys match the
     // field names above). Lines starting with '#' are comments.

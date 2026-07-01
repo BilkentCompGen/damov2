@@ -2,9 +2,12 @@
 # root. Consumed by scripts/*.py.
 
 # --- Simulator ------------------------------------------------------------
-gem5_binary: /opt/gem5/build/X86/gem5.opt      # path to your gem5.opt
+gem5_binary: external/gem5/build/X86/gem5.opt  # path to your gem5.opt (submodule)
 gem5_config: gem5/configs/damov_se.py
-ramulator_config: gem5/ramulator2/HMC-config.yaml
+# Ramulator2 memory: a preset name (hmc / hbm2 / ddr4) or a path to a Ramulator2
+# DSL (.py) / YAML / JSON config. "hmc" => the 3D-stacked HBM2 model (Table 1).
+ramulator_config: hmc
+ramulator_home: external/ramulator2             # Ramulator2 checkout (submodule)
 cpu_type: O3                                   # O3 (out-of-order) or Timing (in-order)
 
 # --- DAMOV2 C++ tools -----------------------------------------------------

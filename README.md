@@ -77,9 +77,14 @@ damov2/
 │   ├── classify/              # Step 3: six-class decision tree
 │   └── cli/                   # damov-locality, damov-stats, damov-classify
 ├── gem5/
-│   ├── configs/               # gem5 SE-mode system: host_ooo/host_prefetch/ndp
-│   └── ramulator2/            # Ramulator2 HMC v2 memory configs
-├── scripts/                   # config generation, run driver, collection
+│   ├── configs/               # gem5 SE-mode system + Ramulator2 config builder
+│   └── ramulator2/            # Ramulator2 DSL memory configs (hmc.py, ddr4.py)
+├── external/                  # git submodules (pinned simulators)
+│   ├── gem5/                  #   github.com/gem5/gem5
+│   └── ramulator2/            #   github.com/CMU-SAFARI/ramulator2
+├── scripts/                   # setup, config generation, run driver, collection
+├── slurm/                     # SLURM cluster job scripts
+├── workloads/STREAM/          # instrumented example workload
 ├── configs/damov.yaml         # global config (core counts, thresholds, paths)
 ├── tests/                     # unit tests (locality, classify, metrics)
 └── docs/methodology.md        # detailed algorithm/metric documentation
@@ -101,38 +106,46 @@ This produces three binaries under `build/`:
 - `damov-stats`    — parse gem5 + Ramulator2 stats into AI/MPKI/LFMR/IPC
 - `damov-classify` — Step 3 bottleneck classification
 
-## Simulator prerequisites (external)
+## Simulator prerequisites (submodules)
 
-DAMOV2 drives, but does not vendor, the two simulators:
+gem5 and Ramulator2 are vendored as git **submodules** under `external/` and
+pinned to known-good versions:
 
-- **gem5** — build with the Ramulator2 memory model enabled
-  (`scons build/X86/gem5.opt`; see `gem5/README.md`).
-- **Ramulator2** — built into gem5 as its `Ramulator2` `SimObject`, configured
-  via the YAML files in `gem5/ramulator2/`.
+```bash
+git submodule update --init --depth 1 external/ramulator2 external/gem5
+scripts/setup_gem5_ramulator2.sh X86 $(nproc)   # builds both + wires them together
+```
 
-See [gem5/README.md](gem5/README.md) for the integration and build instructions.
+`setup_gem5_ramulator2.sh` builds Ramulator2 (`libramulator.so`), installs its
+gem5 wrapper into `external/gem5/src/mem/ramulator2/`, and builds
+`external/gem5/build/X86/gem5.opt`. See [gem5/README.md](gem5/README.md) for what
+it does and how DAMOV2 selects a memory model (`--ramulator-config hmc|ddr4|…`).
 
 ## Quick start (end-to-end for one function)
 
 ```bash
-# 0. Build the C++ tools
+# 0. Build the C++ tools, and (once) the simulators
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -j
+scripts/setup_gem5_ramulator2.sh                # gem5 + Ramulator2 submodules
 
-# 1. Annotate + compile a workload with ROI hooks (see hooks/README section)
+# 1. Build the instrumented workload (ROI hooks + m5ops)
+make -C workloads/STREAM GEM5_ROOT=external/gem5
 
-# 2. Step 2 — generate a trace with gem5 and analyze locality
-python scripts/generate_configs.py --command-file benchmarks/stream.cf
-python scripts/run_experiment.py   --stage trace   --function stream:Add
-build/damov-locality --trace out/stream_Add/trace.gz --json > stream_Add.locality.json
+# 2. Plan + Step 2 (trace) + Step 3 (scalability sweep) via the pipeline
+python scripts/damov2_pipeline.py --descriptor benchmarks/stream.yaml
+# → per-function report, e.g. STREAM Add:
+#   class 1a (DRAM bandwidth); mitigation: NDP
 
-# 3. Step 3 — scalability sweep + classify
-python scripts/run_experiment.py   --stage scaling --function stream:Add \
-       --cores 1,4,16,64,256 --configs host_ooo,host_prefetch,ndp
-python scripts/collect_stats.py    --function stream:Add > stream_Add.metrics.csv
-build/damov-classify --metrics stream_Add.metrics.csv \
-       --locality stream_Add.locality.json
-# → Class 1a (DRAM bandwidth-bound); recommended mitigation: NDP
+# …or run the stages by hand:
+python scripts/generate_configs.py --descriptor benchmarks/stream.yaml
+python scripts/run_experiment.py   --plan out/stream/plan.json --stage trace
+python scripts/run_experiment.py   --plan out/stream/plan.json --stage scale
+python scripts/collect_stats.py    --suite stream --function Add
+build/damov-classify --metrics out/stream/Add.metrics.csv \
+       --locality out/stream/Add.locality.csv --pretty
 ```
+
+On a cluster, use the SLURM scripts instead — see [slurm/README.md](slurm/README.md).
 
 ## License
 

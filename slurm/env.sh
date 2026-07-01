@@ -10,14 +10,21 @@ export PYTHON="${PYTHON:-python3}"
 # DAMOV2 C++ tools (built by 00_prepare.sh into $DAMOV2_ROOT/build).
 export DAMOV2_TOOLS_DIR="${DAMOV2_TOOLS_DIR:-$DAMOV2_ROOT/build}"
 
-# --- Simulators ------------------------------------------------------------
-# gem5 (built with the Ramulator2 memory model — see gem5/README.md).
-export GEM5_ROOT="${GEM5_ROOT:-/opt/gem5}"
+# --- Simulators (git submodules under external/) ---------------------------
+# gem5 built with the Ramulator2 wrapper — see gem5/README.md, or run
+# scripts/setup_gem5_ramulator2.sh once to build+wire both submodules.
+export GEM5_ROOT="${GEM5_ROOT:-$DAMOV2_ROOT/external/gem5}"
 export DAMOV2_GEM5_BIN="${DAMOV2_GEM5_BIN:-$GEM5_ROOT/build/X86/gem5.opt}"
 export DAMOV2_GEM5_CONFIG="${DAMOV2_GEM5_CONFIG:-$DAMOV2_ROOT/gem5/configs/damov_se.py}"
 
-# Ramulator2 memory config (3D-stacked HMC-equivalent by default).
-export DAMOV2_RAMULATOR_CONFIG="${DAMOV2_RAMULATOR_CONFIG:-$DAMOV2_ROOT/gem5/ramulator2/HMC-config.yaml}"
+# Ramulator2 checkout + memory model. DAMOV2_RAMULATOR_CONFIG is a preset name
+# (hmc / hbm2 / ddr4) or a path to a Ramulator2 DSL/YAML/JSON config.
+export RAMULATOR2_HOME="${RAMULATOR2_HOME:-$DAMOV2_ROOT/external/ramulator2}"
+export DAMOV2_RAMULATOR_HOME="${DAMOV2_RAMULATOR_HOME:-$RAMULATOR2_HOME}"
+export DAMOV2_RAMULATOR_CONFIG="${DAMOV2_RAMULATOR_CONFIG:-hmc}"
+# Ramulator2's shared lib + Python DSL must be discoverable at run time.
+export LD_LIBRARY_PATH="$RAMULATOR2_HOME:${LD_LIBRARY_PATH:-}"
+export PYTHONPATH="$RAMULATOR2_HOME/python:${PYTHONPATH:-}"
 
 # Core model for the sweep: O3 (out-of-order) or Timing (in-order).
 export DAMOV2_CPU_TYPE="${DAMOV2_CPU_TYPE:-O3}"

@@ -19,15 +19,24 @@ Edit [`env.sh`](env.sh) (or export the variables before submitting):
 
 | Variable | Meaning |
 |----------|---------|
-| `GEM5_ROOT` / `DAMOV2_GEM5_BIN` | your gem5 checkout / the `gem5.opt` binary |
-| `DAMOV2_RAMULATOR_CONFIG` | Ramulator2 memory YAML (default: HMC-config.yaml) |
+| `GEM5_ROOT` / `DAMOV2_GEM5_BIN` | gem5 submodule / the `gem5.opt` binary (default: `external/gem5`) |
+| `RAMULATOR2_HOME` / `DAMOV2_RAMULATOR_HOME` | Ramulator2 submodule (default: `external/ramulator2`) |
+| `DAMOV2_RAMULATOR_CONFIG` | memory model: preset `hmc`/`hbm2`/`ddr4` or a config path (default: `hmc`) |
 | `DAMOV2_CPU_TYPE` | `O3` (out-of-order) or `Timing` (in-order) |
 | `DAMOV2_DESCRIPTOR` / `DAMOV2_SUITE` | which benchmark descriptor to run |
 | `SLURM_PARTITION`, `SLURM_ACCOUNT`, `SLURM_TIME`, `SLURM_MEM`, `SLURM_CPUS` | job resources |
 | `SLURM_MAX_PARALLEL` | array throttle (`%N` — max concurrent tasks) |
 
-Prerequisite: gem5 built with the Ramulator2 memory model (see
-[../gem5/README.md](../gem5/README.md)).
+Prerequisite: build gem5 + Ramulator2 once (they are git submodules):
+
+```bash
+git submodule update --init --depth 1 external/ramulator2 external/gem5
+scripts/setup_gem5_ramulator2.sh X86 $(nproc)
+```
+
+`env.sh` exports `LD_LIBRARY_PATH` and `PYTHONPATH` for Ramulator2's shared lib
+and Python DSL so the compute nodes can find them. See
+[../gem5/README.md](../gem5/README.md).
 
 ## 2. Submit everything
 
