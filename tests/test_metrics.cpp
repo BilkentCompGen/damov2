@@ -67,7 +67,25 @@ int main() {
     CHECK_NEAR(m2.dram_reads, 12345.0, 1e-9);
     CHECK_NEAR(m2.dram_writes, 6789.0, 1e-9);
 
-    std::remove(gpath.c_str());
     std::remove(rpath.c_str());
+
+    // Multi-channel Ramulator2 stats: per-channel controller keys repeat and
+    // must be SUMMED (matches ramulator_stats.yaml for a 4-channel memory).
+    const std::string multi =
+        "memory_system:\n  controller:\n"
+        "    -\n      num_read_reqs: 1\n      num_write_reqs: 0\n"
+        "    -\n      num_read_reqs: 3\n      num_write_reqs: 2\n"
+        "    -\n      num_read_reqs: 0\n      num_write_reqs: 0\n"
+        "    -\n      num_read_reqs: 2\n      num_write_reqs: 1\n";
+    std::string mpath = writeTemp("damov_test_ram_multi.yaml", multi);
+    RawStats mc;
+    mc.loadGem5(gpath, -1);
+    mc.loadRamulator2(mpath);
+    Metrics mcm = Metrics::compute(mc);
+    CHECK_NEAR(mcm.dram_reads, 6.0, 1e-9);   // 1+3+0+2
+    CHECK_NEAR(mcm.dram_writes, 3.0, 1e-9);  // 0+2+0+1
+
+    std::remove(gpath.c_str());
+    std::remove(mpath.c_str());
     return RUN_TESTS();
 }

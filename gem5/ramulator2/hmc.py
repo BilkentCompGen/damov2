@@ -18,7 +18,9 @@ NUM_CHANNELS = 8
 
 controllers = []
 for _ in range(NUM_CHANNELS):
-    dram = ramulator.dram.HBM2(org_preset="HBM2_8Gb", timing_preset="HBM2_2000Mbps")
+    # channel_width=128 => 64 B transactions, matching the 64 B cache line.
+    dram = ramulator.dram.HBM2(org_preset="HBM2_8Gb", timing_preset="HBM2_2000Mbps",
+                               channel_width=128)
     controllers.append(ramulator.controller.HBM12(
         dram=dram,
         scheduler=ramulator.scheduler.FRFCFS(),

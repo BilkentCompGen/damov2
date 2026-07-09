@@ -42,7 +42,11 @@ def _hbm2_memory_system(ramulator, channels, org="HBM2_8Gb", timing="HBM2_2000Mb
     and bank-level parallelism the paper's HMC config relied on."""
     controllers = []
     for _ in range(channels):
-        dram = ramulator.dram.HBM2(org_preset=org, timing_preset=timing)
+        # channel_width=128 makes HBM2's transaction size 64 B, matching the
+        # 64 B cache line of the DAMOV2 host/NDP systems (gem5 issues 64 B
+        # requests). The default 64-bit width yields 32 B transactions, which
+        # Ramulator2 rejects for a 64 B request.
+        dram = ramulator.dram.HBM2(org_preset=org, timing_preset=timing, channel_width=128)
         controllers.append(ramulator.controller.HBM12(
             dram=dram,
             scheduler=ramulator.scheduler.FRFCFS(),

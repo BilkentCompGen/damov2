@@ -80,7 +80,9 @@ void RawStats::loadRamulator2(const std::string& path) {
         if (!(ss >> name >> value)) continue;
         if (name.empty() || name[0] == '#') continue;
         double v;
-        if (parseNumber(value, v)) values_["ramulator2." + name] = v;
+        // Accumulate: a multi-channel Ramulator2 stats file repeats per-channel
+        // controller keys (e.g. num_read_reqs), so sum them into one total.
+        if (parseNumber(value, v)) values_["ramulator2." + name] += v;
     }
 }
 
