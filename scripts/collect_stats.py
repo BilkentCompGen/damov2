@@ -70,10 +70,13 @@ def collect_metrics(cfg, suite, function, out_csv):
 def collect_locality(cfg, suite, function, out_csv):
     loc_tool = dc.tool(cfg, "damov-locality")
     outdir = dc.out_dir(cfg, suite, function, trace=True)
-    trace = os.path.join(outdir, "trace.gz")
-    if not os.path.exists(trace):
-        trace = os.path.join(outdir, "trace")  # uncompressed fallback
-    if not os.path.exists(trace):
+    # gem5 writes trace.gz; accept the plain-text spellings too, so a trace
+    # produced by hand or by a self-tracing workload is picked up as well.
+    for candidate in ("trace.gz", "trace", "trace.txt"):
+        trace = os.path.join(outdir, candidate)
+        if os.path.exists(trace):
+            break
+    else:
         dc.eprint(f"no trace for {suite}:{function} at {outdir}")
         return False
     loc = cfg.get("locality", {})

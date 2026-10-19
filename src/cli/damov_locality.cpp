@@ -30,6 +30,9 @@ void usage(const char* prog) {
 int main(int argc, char** argv) {
     std::string          trace, name = "function";
     damov::LocalityConfig cfg;
+    // The library defaults to byte granularity; the DAMOV methodology analyzes
+    // at word granularity (docs/methodology.md), so that is this tool's default.
+    cfg.granularity = 8;
     bool                  json = false, profiles = false;
 
     for (int i = 1; i < argc; ++i) {

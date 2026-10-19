@@ -84,21 +84,128 @@ damov2/
 │   └── ramulator2/            #   github.com/CMU-SAFARI/ramulator2
 ├── scripts/                   # setup, config generation, run driver, collection
 ├── slurm/                     # SLURM cluster job scripts
-├── workloads/STREAM/          # instrumented example workload
+├── workloads/STREAM/          # instrumented example workload (untracked; see .gitignore)
+├── examples/hello/            # "hello world" workload + toolchain smoke test
 ├── configs/damov.yaml         # global config (core counts, thresholds, paths)
 ├── tests/                     # unit tests (locality, classify, metrics)
+├── INSTALL.md                 # prerequisites per tier, and how to remove them
 └── docs/methodology.md        # detailed algorithm/metric documentation
 ```
 
+## Dependencies
+
+Everything DAMOV2 needs is in the standard Ubuntu/Debian archives. Package names
+and versions below are verified against **Ubuntu 24.04**; they are the same on
+Debian 12 and on 22.04 except where noted.
+
+### Install everything at once
+
+```bash
+sudo apt update && sudo apt install -y \
+    build-essential cmake git gzip m4 pkg-config scons ca-certificates \
+    python3 python3-dev python3-venv python3-pip \
+    python3-yaml python3-pydot python3-protobuf \
+    zlib1g-dev libprotobuf-dev protobuf-compiler libprotoc-dev \
+    libboost-all-dev libhdf5-dev libpng-dev libelf-dev libcapstone-dev \
+    libgoogle-perftools-dev libgtest-dev
+```
+
+### What each package is for
+
+DAMOV2 has three tiers; each needs the ones above it. **Only tier C (gem5)
+requires the long list** — the C++ tools, Step 2 locality analysis and real
+Ramulator2 DRAM simulation all work with tier A + B.
+
+#### Tier A — DAMOV2 C++ tools and orchestration scripts
+
+| Package | Why |
+|---------|-----|
+| `build-essential` | gcc/g++ and make. Needs C++17 (g++ ≥ 7) |
+| `cmake` | build system; DAMOV2 requires ≥ 3.16 |
+| `python3` | the `scripts/` orchestration layer |
+| `python3-yaml` | *optional* — PyYAML; without it a built-in fallback parser handles the config subset |
+| `gzip` | `damov-locality` reads `.gz` traces by shelling out to `gzip -dc` |
+| `git` | fetching the simulator submodules |
+| `ca-certificates` | HTTPS for submodule and CMake downloads |
+
+#### Tier B — Ramulator2
+
+| Package | Why |
+|---------|-----|
+| `python3-dev` | CPython headers for Ramulator2's nanobind Python bindings |
+| `cmake` ≥ 3.14, g++ ≥ 12 | Ramulator2 is C++20. `build-essential` gives g++ 13 on 24.04; on 22.04 add `g++-12` and pass `-DCMAKE_CXX_COMPILER=g++-12` |
+
+Ramulator2 downloads yaml-cpp, fmt and nanobind itself via CMake `FetchContent`,
+so no apt packages are needed for those — but **the configure step needs network
+access**.
+
+#### Tier C — gem5
+
+| Package | Why |
+|---------|-----|
+| `scons` | gem5's build system |
+| `m4` | **fatal if missing**, and absent from gem5's own documented list |
+| `pkg-config` | locating gem5's link-time dependencies |
+| `protobuf-compiler`, `libprotobuf-dev`, `libprotoc-dev` | gem5's protobuf trace support — required for `CommMonitor` trace dumping, i.e. Step 2 |
+| `python3-dev` | gem5 embeds CPython |
+| `python3-venv` | gem5's build creates a virtualenv for its Python deps |
+| `zlib1g-dev` | compressed stats and traces |
+| `libboost-all-dev` | gem5 C++ dependencies |
+| `libhdf5-dev` | optional HDF5 stats output. On releases before 24.04 this is `libhdf5-serial-dev` |
+| `libpng-dev` | framebuffer image output |
+| `libelf-dev` | ELF loading in SE mode |
+| `libcapstone-dev` | instruction disassembly in traces |
+| `libgoogle-perftools-dev` | tcmalloc; a large speedup for long simulations |
+| `libgtest-dev` | gem5's own unit tests (skip if you will not run them) |
+| `python3-pydot` | *optional* — gem5 config-graph output |
+| `python3-protobuf` | `scripts/proto2trace.py`, if your gem5 emits protobuf packet traces |
+
+#### Optional — Step 1 profiling
+
+Step 1 (identifying memory-bound hot functions) uses Intel VTune's top-down
+analysis. VTune is proprietary and **not in the Ubuntu archives**; it installs
+from Intel's own apt repository as `intel-oneapi-vtune`. DAMOV2 does not automate
+it and does not need it — Step 1's only output is an ROI-annotated binary, which
+you can also produce from `perf` (`linux-tools-generic`) or by inspection, at the
+cost of VTune's memory-bound percentage.
+
+### snap
+
+snap is **not** a useful substitute for most of the above, because gem5 links
+against development headers that snaps do not provide. Two relevant snaps exist:
+
+| Snap | Status |
+|------|--------|
+| `sudo snap install cmake --classic` | Usable alternative to apt's `cmake` (4.4.4 vs 3.28.3, publisher Canonical). Only worth it if you need a newer CMake than your release ships — DAMOV2 needs just ≥ 3.16 |
+| `sudo snap install protobuf --classic` | **Not a substitute.** Ships only the `protoc` binary, at 3.14.0 from 2021, from an unverified publisher. gem5 needs the `libprotobuf-dev`/`libprotoc-dev` headers and libraries to compile and link, which this does not provide |
+
+There are no snaps for `scons`, gem5 or Ramulator2.
+
+See [INSTALL.md](INSTALL.md) for which of these are already on a given machine,
+and for how to remove them again cleanly.
+
 ## Building the C++ toolchain
 
-Requires CMake ≥ 3.16 and a C++17 compiler.
+Requires CMake ≥ 3.16 and a C++17 compiler. See [INSTALL.md](INSTALL.md) for the
+full prerequisite list per tier (and how to remove it all again).
 
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
 ctest --test-dir build          # run unit tests
 ```
+
+## Checking that it works
+
+```bash
+scripts/smoke_test.sh
+```
+
+Runs the [hello-world example](examples/hello/) through every stage and checks
+the result against the two classes its kernels are known to belong to. Stages
+whose prerequisites are missing skip rather than fail, so this is also the quick
+way to see how far your install gets — everything except the gem5 sweep works
+without gem5.
 
 This produces three binaries under `build/`:
 

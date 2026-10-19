@@ -1,0 +1,20 @@
+# DAMOV2 descriptor for the hello-world example (examples/hello).
+#
+# Two kernels with deliberately opposite locality, so the expected DAMOV answer
+# is known up front and the toolchain can be checked against it:
+#   stream -> low temporal locality,  high MPKI -> class 1a (DRAM bandwidth)
+#   reuse  -> high temporal locality, low AI    -> class 2b (L1 cache capacity)
+#
+# Build the binary first:  make -C examples/hello gem5 GEM5_ROOT=external/gem5
+# Verify without gem5:     scripts/smoke_test.sh
+
+suite: hello
+functions:
+  - name: stream
+    binary: examples/hello/hello_damov
+    options: "stream 4096"
+    class: 1a            # sequential, no reuse -> DRAM bandwidth-bound
+  - name: reuse
+    binary: examples/hello/hello_damov
+    options: "reuse 8 1024"
+    class: 2b            # tiny working set, hammered -> cache-resident
