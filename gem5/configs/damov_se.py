@@ -28,7 +28,7 @@ import sys
 
 import m5
 from m5.objects import (
-    System, SrcClockDomain, VoltageDomain, AddrRange, MemMode,
+    System, SrcClockDomain, VoltageDomain, AddrRange,
     SEWorkload, Process, SystemXBar, L2XBar, Root, CommMonitor, Addr,
 )
 
@@ -98,6 +98,17 @@ def make_cpu(cpu_type, detailed, cpu_id):
     return TimingSimpleCPU(cpu_id=cpu_id)
 
 
+def setup_interrupts(cpu, system):
+    """x86 requires a local APIC per thread, with its PIO and interrupt ports
+    hung off the membus; gem5 fatals at instantiate otherwise. Only active
+    (non-switched-out) CPUs need this — switched-out CPUs skip the check and
+    take over the controller during m5.switchCpus()."""
+    cpu.createInterruptController()
+    cpu.interrupts[0].pio = system.membus.mem_side_ports
+    cpu.interrupts[0].int_requestor = system.membus.cpu_side_ports
+    cpu.interrupts[0].int_responder = system.membus.mem_side_ports
+
+
 # --------------------------------------------------------------------------- #
 # Cache hierarchy per configuration
 # --------------------------------------------------------------------------- #
@@ -114,12 +125,13 @@ def connect_caches(system, args):
         for i, cpu in enumerate(system.cpu):
             l1d = caches.NDPL1DCache()
             l1i = caches.L1ICache()
-            cpu.icache = l1i
-            cpu.dcache = l1d
-            cpu.icache_port = l1i.cpu_side
-            cpu.dcache_port = l1d.cpu_side
-            l1i.mem_side = membus.cpu_side_ports
-            l1d.mem_side = membus.cpu_side_ports
+            cpu.addPrivateSplitL1Caches(l1i, l1d)
+            cpu.icache.mem_side = membus.cpu_side_ports
+            cpu.dcache.mem_side = membus.cpu_side_ports
+            # Page-table-walker ports must be connected too: SE-mode execution
+            # never uses them (walks are functional), but m5.switchCpus() calls
+            # BaseMMU::takeOverFrom, which asserts the old walker ports are bound.
+            cpu.mmu.connectWalkerPorts(membus.cpu_side_ports, membus.cpu_side_ports)
         return membus
 
     # host_ooo / host_prefetch: private L1 + private L2 per core, shared L3.
@@ -137,16 +149,17 @@ def connect_caches(system, args):
               if args.config == "host_prefetch" else caches.L2Cache())
         l2bus = L2XBar()
         setattr(system, f"l2bus{i}", l2bus)
-        setattr(system, f"l1i{i}", l1i)
-        setattr(system, f"l1d{i}", l1d)
         setattr(system, f"l2_{i}", l2)
 
-        cpu.icache = l1i
-        cpu.dcache = l1d
-        cpu.icache_port = l1i.cpu_side
-        cpu.dcache_port = l1d.cpu_side
-        l1i.mem_side = l2bus.cpu_side_ports
-        l1d.mem_side = l2bus.cpu_side_ports
+        # addPrivateSplitL1Caches parents the L1s to the CPU and records them in
+        # _cached_ports, which m5.switchCpus()/takeOverFrom rely on — wiring the
+        # ports by hand instead breaks the ROI CPU switch.
+        cpu.addPrivateSplitL1Caches(l1i, l1d)
+        cpu.icache.mem_side = l2bus.cpu_side_ports
+        cpu.dcache.mem_side = l2bus.cpu_side_ports
+        # Walker ports route through the per-core L2 bus. Needed for the ROI CPU
+        # switch: BaseMMU::takeOverFrom asserts the old walker ports are bound.
+        cpu.mmu.connectWalkerPorts(l2bus.cpu_side_ports, l2bus.cpu_side_ports)
         l2.cpu_side = l2bus.mem_side_ports
         l2.mem_side = l3bus.cpu_side_ports
 
@@ -156,7 +169,7 @@ def connect_caches(system, args):
 # --------------------------------------------------------------------------- #
 # Ramulator2 main memory (replaces the original DAMOV's Ramulator v1)
 # --------------------------------------------------------------------------- #
-def connect_memory(system, args, mem_port):
+def connect_memory(system, args, mem_source_port):
     # Ramulator2 v2.1 ships a gem5 wrapper (an AbstractMemory SimObject named
     # `Ramulator2`) that takes a single `ramulator_config` JSON string. That
     # string is produced from Ramulator2's Python DSL by ramulator2_mem.
@@ -176,7 +189,7 @@ def connect_memory(system, args, mem_port):
     system.mem_ranges = [mem_range]
     mem = Ramulator2(ramulator_config=cfg_string, range=mem_range)
     system.mem_ctrl = mem
-    mem.port = mem_port.mem_side_ports
+    mem.port = mem_source_port
 
 
 # --------------------------------------------------------------------------- #
@@ -189,31 +202,51 @@ def main():
     system = System()
     system.clk_domain = SrcClockDomain(clock=args.freq,
                                        voltage_domain=VoltageDomain())
-    system.mem_mode = "timing"
+    # With ROI fast-forward the warm-up CPU is AtomicSimpleCPU, so the system
+    # must start in atomic mode; m5.switchCpus() flips it to timing when the
+    # detailed CPU takes over (it derives the mode from the incoming CPU).
+    # Without ROI switching the detailed (timing/O3) CPU runs from the start.
+    system.mem_mode = "atomic" if args.roi_switch else "timing"
+
+    # Work-item (ROI) protocol — contract with hooks/damov_hooks.h, which emits
+    # m5_work_begin/end with DAMOV_ROI_WORK_ID=100 and DAMOV_FUNCTION_WORK_ID=101.
+    # gem5's num_work_ids defaults to 16, so any workload using these hooks
+    # fatals ("workid greater than specified") unless we raise it past 101.
+    DAMOV_ROI_WORK_ID = 100
+    DAMOV_FUNCTION_WORK_ID = 101
+    system.num_work_ids = DAMOV_FUNCTION_WORK_ID + 1
+    if args.roi_switch:
+        # Track only the ROI work item so the detailed CPU switches in at
+        # damov_roi_begin() ("work started count reach") and stats are dumped at
+        # damov_roi_end() ("work items exit count reached"); the switch loop
+        # below keys off those exit causes.
+        system.work_item_id = DAMOV_ROI_WORK_ID
+        system.work_begin_exit_count = 1
+        system.work_end_exit_count = 1
 
     # ROI fast-forward: build atomic warm-up CPUs and detailed switch CPUs.
     detailed = not args.roi_switch
     system.cpu = [make_cpu(args.cpu_type, detailed=detailed, cpu_id=i)
                   for i in range(args.cores)]
 
-    for cpu in system.cpu:
-        cpu.createThreads()
-
     mem_port = connect_caches(system, args)
 
     # Optional memory-trace probe for Step-2 locality analysis. The CommMonitor
     # is inserted between the membus and main memory so it observes the DRAM
     # reference stream (post-cache), which is what the locality tool analyzes.
-    trace_target = mem_port
+    mem_source_port = mem_port.mem_side_ports
     if args.trace:
         mon = CommMonitor()
         system.mem_monitor = mon
-        mon.slave = mem_port.mem_side_ports  # naming varies by gem5 version
+        # CommMonitor sits between the membus mem-side and main memory so it
+        # observes the post-cache DRAM stream. gem5 v25.1 renamed the ports
+        # slave/master -> cpu_side_port/mem_side_port.
+        mon.cpu_side_port = mem_port.mem_side_ports
         trace_file = args.trace_file or os.path.join(args.output_dir, "trace.gz")
         _attach_trace_probe(mon, trace_file)
-        trace_target = mon
+        mem_source_port = mon.mem_side_port
 
-    connect_memory(system, args, trace_target)
+    connect_memory(system, args, mem_source_port)
 
     system.system_port = system.membus.cpu_side_ports
 
@@ -227,6 +260,7 @@ def main():
     for cpu in system.cpu:
         cpu.workload = process
         cpu.createThreads()
+        setup_interrupts(cpu, system)
 
     root = Root(full_system=False, system=system)
 
@@ -240,6 +274,14 @@ def main():
             scpu.system = system
             scpu.clk_domain = system.clk_domain
             scpu.switched_out = True
+            # gem5 validates workload.size() == numThreads for every CPU,
+            # including switched-out ones (Simulation.py does the same).
+            scpu.workload = system.cpu[i].workload
+            # Each switch CPU builds its own ISA/decoder (one createThreads per
+            # object is fine). It must NOT share system.cpu[i].isa — two CPUs
+            # owning one ISA SimObject segfaults during thread construction.
+            # Switched-out CPUs skip the interrupt-controller check and take
+            # over the warm-up CPU's controller during m5.switchCpus().
             scpu.createThreads()
         system.switch_cpus = switch_cpus
 

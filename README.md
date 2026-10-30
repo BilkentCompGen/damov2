@@ -228,6 +228,19 @@ gem5 wrapper into `external/gem5/src/mem/ramulator2/`, and builds
 `external/gem5/build/X86/gem5.opt`. See [gem5/README.md](gem5/README.md) for what
 it does and how DAMOV2 selects a memory model (`--ramulator-config hmc|ddr4|…`).
 
+The ROI hooks' `libm5` backend is a **separate build** that the setup script
+does *not* perform — build it once so `damov_hooks.h` can issue real m5ops
+(this is what the `hooks: libm5 m5ops` smoke-test stage needs):
+
+```bash
+cd external/gem5/util/m5 && scons build/x86/out/libm5.a
+```
+
+Nothing above requires extra system packages beyond the tier-C set in
+[§ Dependencies](#dependencies) — these three artifacts (Ramulator2's
+`libramulator.so`, `gem5.opt`, and `libm5.a`) are the only build steps standing
+between a fresh checkout and a green `scripts/smoke_test.sh`.
+
 ## Quick start (end-to-end for one function)
 
 ```bash

@@ -39,7 +39,11 @@ fi
 echo "==> [3/4] Installing the gem5 wrapper into src/mem/ramulator2/"
 DEST="$GEM5/src/mem/ramulator2"
 mkdir -p "$DEST"
-cp -v "$RAM"/resources/gem5_wrappers/{ramulator2.hh,ramulator2.cc,Ramulator2.py,SConscript} "$DEST/"
+# Copy the whole wrapper set: later Ramulator2 (post-v2.1.0) splits the wrapper
+# into ramulator2{,_base,_vector_ports}.{cc,hh} + Ramulator2{,VectorPorts}.py,
+# and its SConscript Source()s all of them, so copying only a subset breaks the
+# gem5 build.
+cp -v "$RAM"/resources/gem5_wrappers/* "$DEST/"
 # Point the wrapper's SConscript at our Ramulator2 checkout (replace the
 # placeholder RAMULATOR2_HOME line).
 sed -i "s|^RAMULATOR2_HOME = .*|RAMULATOR2_HOME = '$RAM'|" "$DEST/SConscript"
