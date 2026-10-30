@@ -6,9 +6,10 @@ workload. Supports:
 
   * scalability sweeps over core counts {1,4,16,64,256} (Table 1),
   * out-of-order (O3) or in-order (TimingSimple) cores (Section 3.5.2),
-  * region-of-interest fast-forwarding: an AtomicSimple CPU warms up until the
+  * region-of-interest fast-forwarding: a TimingSimple CPU warms up until the
     first damov_work_begin (m5_work_begin), then gem5 switches to the detailed
-    CPU + Ramulator2 for the region of interest,
+    CPU + Ramulator2 for the region of interest (see make_cpu for why the
+    warm-up CPU is timing, not atomic),
   * optional CommMonitor memory-trace dumping for Step-2 locality analysis.
 
 Run (example):
@@ -64,7 +65,7 @@ def parse_args():
     p.add_argument("--max-insts", type=int, default=0,
                    help="stop after N instructions in the ROI (0 = run to completion)")
     p.add_argument("--roi-switch", action="store_true", default=True,
-                   help="warm up atomically, switch to detailed CPU at ROI begin")
+                   help="warm up on a Timing CPU, switch to detailed CPU at ROI begin")
     p.add_argument("--no-roi-switch", dest="roi_switch", action="store_false")
     p.add_argument("--trace", action="store_true",
                    help="attach a CommMonitor and dump a memory trace for Step 2")
@@ -78,10 +79,20 @@ def parse_args():
 # --------------------------------------------------------------------------- #
 def make_cpu(cpu_type, detailed, cpu_id):
     """Return a CPU object. `detailed` selects the timing model used inside the
-    ROI; the warm-up CPU is always AtomicSimple for speed."""
-    from m5.objects import AtomicSimpleCPU
+    ROI; the warm-up CPU is a TimingSimpleCPU.
+
+    The warm-up CPU is deliberately *not* AtomicSimpleCPU. Ramulator2's gem5
+    wrapper is a timing-only model that mishandles the atomic->timing memory-mode
+    transition m5.switchCpus() performs: after an atomic warm-up, an O3 ROI CPU's
+    multiple-outstanding requests to Ramulator2 never get responses and commit
+    deadlocks (a TimingSimpleCPU ROI survives it; O3-from-start works because it
+    never leaves timing mode). A TimingSimpleCPU warm-up keeps the system in
+    timing mode for the whole run, so Ramulator2 never sees an atomic phase. It
+    is slower to fast-forward than atomic, but the warm-up region is not measured
+    (stats are reset at the switch)."""
     if not detailed:
-        return AtomicSimpleCPU(cpu_id=cpu_id)
+        from m5.objects import TimingSimpleCPU
+        return TimingSimpleCPU(cpu_id=cpu_id)
     if cpu_type == "O3":
         # 4-wide out-of-order, 128-entry ROB, 32-entry LSQ (Table 1).
         from m5.objects import DerivO3CPU
@@ -202,11 +213,11 @@ def main():
     system = System()
     system.clk_domain = SrcClockDomain(clock=args.freq,
                                        voltage_domain=VoltageDomain())
-    # With ROI fast-forward the warm-up CPU is AtomicSimpleCPU, so the system
-    # must start in atomic mode; m5.switchCpus() flips it to timing when the
-    # detailed CPU takes over (it derives the mode from the incoming CPU).
-    # Without ROI switching the detailed (timing/O3) CPU runs from the start.
-    system.mem_mode = "atomic" if args.roi_switch else "timing"
+    # Timing mode for the whole run: the warm-up CPU is a TimingSimpleCPU (see
+    # make_cpu for why not atomic), so there is no atomic->timing transition for
+    # m5.switchCpus() to perform — which is what Ramulator2 + an O3 ROI CPU
+    # deadlock on.
+    system.mem_mode = "timing"
 
     # Work-item (ROI) protocol — contract with hooks/damov_hooks.h, which emits
     # m5_work_begin/end with DAMOV_ROI_WORK_ID=100 and DAMOV_FUNCTION_WORK_ID=101.
@@ -224,7 +235,7 @@ def main():
         system.work_begin_exit_count = 1
         system.work_end_exit_count = 1
 
-    # ROI fast-forward: build atomic warm-up CPUs and detailed switch CPUs.
+    # ROI fast-forward: build Timing warm-up CPUs and detailed switch CPUs.
     detailed = not args.roi_switch
     system.cpu = [make_cpu(args.cpu_type, detailed=detailed, cpu_id=i)
                   for i in range(args.cores)]
@@ -264,8 +275,8 @@ def main():
 
     root = Root(full_system=False, system=system)
 
-    # ROI switch: run atomically, and when m5_work_begin fires switch to the
-    # detailed CPU model (registered below via switch CPUs).
+    # ROI switch: warm up on the TimingSimple CPU, and when m5_work_begin fires
+    # switch to the detailed CPU model (registered below via switch CPUs).
     switch_cpus = None
     if args.roi_switch:
         switch_cpus = [make_cpu(args.cpu_type, detailed=True, cpu_id=i)
