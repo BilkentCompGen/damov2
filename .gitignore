@@ -46,3 +46,10 @@ m5out/
 *.proto.gz
 workloads/
 2105.03725v6.pdf
+
+# examples/hello build artifacts (rebuilt by `make -C examples/hello`)
+/examples/hello/hello_damov
+/examples/hello/hello_damov_native
+/examples/hello/hello_damov_trace
+/examples/hello/hello_damov_magic
+/examples/hello/hello_trace*.txt
