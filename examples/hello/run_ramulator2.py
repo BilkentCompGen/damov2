@@ -80,8 +80,7 @@ def main():
     sim = ramulator.Simulation(
         frontend={"impl": "LoadStoreTrace", "clock_ratio": 1, "path": ldst},
         memory_system=mem)
-    sim.run()
-    sim.finalize()
+    sim.run()  # Ramulator2 v2.1.0 finalizes internally; stats are ready after run()
 
     with open(args.out, "w") as f:
         f.write(sim.stats_yaml)
