@@ -241,6 +241,43 @@ Nothing above requires extra system packages beyond the tier-C set in
 `libramulator.so`, `gem5.opt`, and `libm5.a`) are the only build steps standing
 between a fresh checkout and a green `scripts/smoke_test.sh`.
 
+## Configuration
+
+All tunable parameters live in [configs/damov.yaml](configs/damov.yaml); the
+Python pipeline reads them and passes them on to gem5 and the C++ tools. Edit
+that file to change the experiment — no code changes needed. Several of them
+(the paths, `cpu_type`, `ramulator_config`) also honor a per-run `DAMOV2_*`
+environment-variable override (e.g. `DAMOV2_GEM5_BIN`, `DAMOV2_CPU_TYPE`,
+`DAMOV2_RAMULATOR_CONFIG`); `cores` and `thresholds` are set only in the file.
+
+| Parameter | What it controls | Default |
+|-----------|------------------|---------|
+| `cores` | core counts in the Step-3 scalability sweep | `[1, 4, 16, 64]` |
+| `configs` | system configurations to run (Table 1) | `[host_ooo, host_prefetch, ndp]` |
+| `classify_config` | which config's sweep drives classification | `host_ooo` |
+| `cpu_type` | detailed ROI CPU: `O3` (out-of-order) or `Timing` (in-order) | `O3` |
+| `ramulator_config` | memory model: preset `hmc`/`hbm2`/`ddr4` or a DSL/YAML/JSON path | `hmc` |
+| `thresholds` | validated Step-3 decision thresholds (paper §3.5.1) | TL `0.48`, LFMR `0.56`, MPKI `11.0`, AI `8.5`, trend `0.10` |
+| `locality` | Step-2 spatial/temporal windows + granularity | windows `64`, granularity `8` B |
+
+### The core-count sweep and the 256-core point
+
+The paper's Table 1 sweeps `{1, 4, 16, 64, 256}` cores, but the shipped default
+**caps at 64**. A 256-core out-of-order gem5 run needs **~60 GB+ of free host
+RAM** and is killed by the OOM killer on typical machines; when that happens the
+sweep fails and, because classification reads the highest-core-count run,
+bandwidth-bound functions misclassify (e.g. `1a` → `1c`) off the empty stats.
+
+64 cores already exposes **Class 1a** DRAM-bandwidth saturation, so the default
+sweep classifies every class correctly **except Class 2a** (L3 contention), which
+only manifests at 256 cores. To run the full paper sweep on a large-memory host
+or the [SLURM cluster setup](slurm/), add `256` back:
+
+```yaml
+# configs/damov.yaml
+cores: [1, 4, 16, 64, 256]     # needs ~60 GB+ free RAM for the 256-core runs
+```
+
 ## Quick start (end-to-end for one function)
 
 ```bash
