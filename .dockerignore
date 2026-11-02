@@ -1,0 +1,37 @@
+# Keep the build context small and the image reproducible: ship the git
+# metadata so the build can fetch the pinned submodules itself, but not the
+# host's build trees, simulator checkouts, downloaded workloads or outputs.
+
+# Host build artifacts (rebuilt inside the image)
+build/
+examples/hello/hello_damov
+examples/hello/hello_damov_native
+examples/hello/hello_damov_trace
+examples/hello/hello_damov_magic
+examples/hello/hello_trace*.txt
+
+# Submodule working trees — re-fetched fresh via `git submodule update` so the
+# image always builds the pinned commits regardless of local state.
+external/gem5/
+external/ramulator2/
+
+# Simulator outputs and downloaded workloads
+out/
+m5out/
+workloads/
+*.proto.gz
+*.zsim.out
+
+# Python / editor / OS cruft
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Docs/binaries not needed to build
+2105.03725v6.pdf

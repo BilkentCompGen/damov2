@@ -241,6 +241,42 @@ Nothing above requires extra system packages beyond the tier-C set in
 `libramulator.so`, `gem5.opt`, and `libm5.a`) are the only build steps standing
 between a fresh checkout and a green `scripts/smoke_test.sh`.
 
+## Running under Docker
+
+The entire toolchain is userspace, so the [Dockerfile](Dockerfile) builds a
+self-contained image — the C++ tools, Ramulator2 and gem5 SE-mode all run with
+**no `--privileged`, no added capabilities and no host devices**. (The one part
+of the methodology that needs bare metal is Step 1's VTune profiling, which
+reads hardware performance counters; DAMOV2 does not automate it and consumes
+only its output, so Steps 2 and 3 containerize completely.)
+
+```bash
+docker build -t damov2 .                              # compiles gem5 from source
+docker run --rm -it damov2 scripts/smoke_test.sh      # full end-to-end check
+docker run --rm -it damov2                            # or an interactive shell
+```
+
+The image is multi-stage: a builder compiles the C++ tools, `libramulator.so`,
+`gem5.opt` and `libm5.a`, and a slim runtime stage carries just those artifacts
+and the shared libraries they load. gem5's `build/X86/gem5.opt` is already wired
+up and on `DAMOV2_GEM5_BIN`, and the `damov-*` tools are on `PATH`, so the
+pipeline and the smoke test run with no further setup.
+
+Two caveats, neither of them about privilege:
+
+- **Build needs network.** `docker build` fetches the pinned submodules
+  (gem5 v25.1, Ramulator2 v2.1.0) and lets Ramulator2's CMake `FetchContent`
+  pull yaml-cpp/fmt/nanobind. It also compiles gem5 from source — budget tens of
+  minutes and several GB of RAM for the build; raise `JOBS` to parallelise:
+  `docker build -t damov2 --build-arg JOBS=$(nproc) .`.
+- **Runs need memory, not elevation.** The core-count sweep is memory-bound
+  exactly as on the host (see below). Give the container headroom —
+  `docker run --memory=48g …` — or a large sweep OOMs inside the container just
+  as it would outside it.
+
+To inspect results on the host, bind-mount the output tree:
+`docker run --rm -it -v "$PWD/out:/opt/damov2/out" damov2 scripts/smoke_test.sh --keep`.
+
 ## Configuration
 
 All tunable parameters live in [configs/damov.yaml](configs/damov.yaml); the
