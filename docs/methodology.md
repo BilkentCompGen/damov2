@@ -103,6 +103,13 @@ while using the whole sweep to determine the LFMR trend. This matches the
 paper's observations that Class 1a functions saturate DRAM bandwidth near 64
 cores and Class 2a functions become contention-bound at 256 cores.
 
+The shipped [configs/damov.yaml](../configs/damov.yaml) caps the default sweep
+at `{1,4,16,64}`: a 256-core out-of-order run needs ~60 GB+ of host RAM and OOMs
+on typical machines, and 64 cores already captures Class 1a bandwidth
+saturation. The 256-core point is therefore opt-in — add it back to `cores:` on
+a large-memory host or cluster when you need faithful **Class 2a** (L3
+contention) classification, which only manifests at that scale.
+
 ## Differences from the original DAMOV that affect numbers
 
 1. **Simulators**: gem5 (vs ZSim) and Ramulator2 (vs Ramulator v1). Absolute

@@ -15,7 +15,12 @@ tools_dir: build                               # directory holding damov-localit
 
 # --- Experiment sweep (Table 1) ------------------------------------------
 output_root: out
-cores: [1, 4, 16, 64, 256]
+# Paper Table 1 sweeps {1,4,16,64,256}. The default caps at 64 because a
+# 256-core out-of-order gem5 run needs ~60 GB+ of free host RAM and OOMs on
+# typical machines. 64 cores already exposes Class 1a DRAM-bandwidth
+# saturation; add 256 back for faithful Class 2a (L3 contention) detection on a
+# large-memory host or cluster (see docs/methodology.md).
+cores: [1, 4, 16, 64]
 configs: [host_ooo, host_prefetch, ndp]
 classify_config: host_ooo                      # config whose sweep drives classification
 

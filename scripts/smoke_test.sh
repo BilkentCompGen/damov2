@@ -191,8 +191,8 @@ stage "9. Orchestration — plan + gem5 command construction [REAL]"
 if python3 scripts/generate_configs.py --descriptor benchmarks/hello.yaml \
        --out "$OUT/plan.json" >/dev/null 2>&1; then
     njobs=$(python3 -c "import json;print(len(json.load(open('$OUT/plan.json'))['jobs']))")
-    # 2 functions x (1 trace + 3 configs x 5 core counts) = 32
-    check_num "plan job count" "$njobs" 32 32
+    # 2 functions x (1 trace + 3 configs x 4 core counts) = 26
+    check_num "plan job count" "$njobs" 26 26
 else
     fail "generate_configs.py failed"
 fi
