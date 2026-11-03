@@ -83,7 +83,11 @@ fi
 # --------------------------------------------------------------------------- #
 stage "3. Workload runs natively [REAL]"
 # --------------------------------------------------------------------------- #
-if examples/hello/hello_damov_native stream 4096 | grep -q "hello, DAMOV2"; then
+# Capture then grep (not `... | grep -q`): see the note at stage 9 — grep -q
+# closing the pipe early can make the producer exit non-zero under pipefail.
+mkdir -p "$OUT"
+if examples/hello/hello_damov_native stream 4096 >"$OUT/native.out" 2>/dev/null \
+   && grep -q "hello, DAMOV2" "$OUT/native.out"; then
     pass "hello_damov_native stream (ROI hooks are no-ops off-simulator)"
 else
     fail "hello_damov_native did not run"
@@ -196,11 +200,19 @@ if python3 scripts/generate_configs.py --descriptor benchmarks/hello.yaml \
 else
     fail "generate_configs.py failed"
 fi
+# Capture to files rather than piping into `grep -q`: with `set -o pipefail`,
+# grep -q closes the pipe on its first match while run_experiment is still
+# printing the remaining jobs, so Python hits a broken pipe and exits non-zero —
+# and whether that surfaces is Python/OS-dependent, so the pipeline flakes across
+# machines. Writing to a file and grepping it is deterministic everywhere.
+dry_out="$OUT/dry-run.out"; dry_err="$OUT/dry-run.stderr"
 if python3 scripts/run_experiment.py --plan "$OUT/plan.json" --dry-run \
-       2>/dev/null | grep -q -- "--ramulator-config"; then
+       >"$dry_out" 2>"$dry_err" && grep -q -- "--ramulator-config" "$dry_out"; then
     pass "gem5 command lines constructed (--dry-run)"
 else
     fail "run_experiment.py --dry-run produced no gem5 commands"
+    # Surface the hidden cause instead of leaving the user to guess.
+    [[ -s "$dry_err" ]] && sed 's/^/        /' "$dry_err" >&2
 fi
 if python3 scripts/export_joblist.py --plan "$OUT/plan.json" \
        --out "$OUT/joblist.txt" >/dev/null 2>&1 && [[ -s "$OUT/joblist.txt" ]]; then

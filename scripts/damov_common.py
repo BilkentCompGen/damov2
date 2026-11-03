@@ -49,13 +49,26 @@ def _coerce(v):
         return v
 
 
+def _strip_inline_comment(ln):
+    """Drop a trailing YAML comment (a '#' preceded by whitespace). PyYAML does
+    this; the fallback must too, or values like `gem5_binary: path  # note` keep
+    the comment text and break on machines without PyYAML. A leading '#' (full
+    comment line) is left intact for the caller's startswith('#') filter, and a
+    '#' with no preceding whitespace is treated as part of the value."""
+    for j in range(1, len(ln)):
+        if ln[j] == "#" and ln[j - 1] in " \t":
+            return ln[:j]
+    return ln
+
+
 def _tiny_yaml(text):
     """Parse the restricted YAML subset used by DAMOV2 config files: nested
     mappings by indentation, inline lists, and `- ` list items of mappings."""
     root = {}
     stack = [(-1, root)]
-    lines = [ln.rstrip() for ln in text.splitlines()
-             if ln.strip() and not ln.strip().startswith("#")]
+    lines = [stripped for stripped in
+             (_strip_inline_comment(ln).rstrip() for ln in text.splitlines())
+             if stripped.strip() and not stripped.strip().startswith("#")]
     i = 0
     while i < len(lines):
         line = lines[i]
