@@ -79,10 +79,14 @@ FROM ubuntu:24.04 AS runtime
 ARG ISA=X86
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Runtime-only: no build-essential / cmake / scons / git. The -dev library
-# packages are a convenient superset that guarantees the exact shared objects
-# gem5.opt and libramulator.so link against are present.
+# No scons / m4 / protobuf-compiler / git: the smoke test never rebuilds gem5 or
+# Ramulator2 (it uses the prebuilt gem5.opt and libramulator.so). It does, though,
+# recompile the C++ tools and the hello-world workload from scratch, so keep
+# build-essential + cmake. The -dev library packages are a convenient superset
+# that guarantees the exact shared objects gem5.opt and libramulator.so link
+# against are present.
 RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential cmake \
         python3 python3-dev python3-yaml python3-pydot python3-protobuf \
         gzip ca-certificates \
         zlib1g-dev libprotobuf-dev \
