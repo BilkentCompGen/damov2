@@ -1,0 +1,128 @@
+# DAMOV2 descriptor for DAMOV suite 'ligra', migrated from DAMOV
+# command file(s) ligra_cf (biopim/damov@4d611a5) by
+# scripts/migrate_damov.py. {threads} expands to the simulated core count of
+# each job (DAMOV's THREADS); {root} to the DAMOV2 repository root.
+#
+# Binaries must be rebuilt against hooks/compat/zsim_hooks.h (or ported to
+# hooks/damov_hooks.h): ZSim-instrumented builds never trigger the gem5 ROI.
+# See docs/migrating-from-damov.md.
+
+suite: "ligra"
+functions:
+  - name: "BC_computeRmat"    # ligra_cf:1, DAMOV stats ligra_BC_computeRmat
+    binary: "{root}/workloads/ligra/apps/BC_Compute"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/rMat_20M"
+  - name: "BC_computeUSA"    # ligra_cf:2, DAMOV stats ligra_BC_computeUSA
+    binary: "{root}/workloads/ligra/apps/BC_Compute"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/USA-road-d.USA.gr.parboil_AG"
+  - name: "BC_edgeMapDenseRmat"    # ligra_cf:3, DAMOV stats ligra_BC_edgeMapDenseRmat
+    binary: "{root}/workloads/ligra/apps/BC_Emd"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/rMat_20M"
+  - name: "BC_edgeMapSparseRmat"    # ligra_cf:4, DAMOV stats ligra_BC_edgeMapSparseRmat
+    binary: "{root}/workloads/ligra/apps/BC_Ems"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/rMat_20M"
+  - name: "BFSCC_computeRmat"    # ligra_cf:5, DAMOV stats ligra_BFSCC_computeRmat
+    binary: "{root}/workloads/ligra/apps/BFSCC_Compute"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/rMat_20M"
+  - name: "BFSCC_computeUSA"    # ligra_cf:6, DAMOV stats ligra_BFSCC_computeUSA
+    binary: "{root}/workloads/ligra/apps/BFSCC_Compute"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/USA-road-d.USA.gr.parboil_AG"
+  - name: "BFSCC_edgeMapDenseRmat"    # ligra_cf:7, DAMOV stats ligra_BFSCC_edgeMapDenseRmat
+    binary: "{root}/workloads/ligra/apps/BFSCC_Emd"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/rMat_20M"
+  - name: "BFSCC_edgeMapSparseRmat"    # ligra_cf:8, DAMOV stats ligra_BFSCC_edgeMapSparseRmat
+    binary: "{root}/workloads/ligra/apps/BFSCC_Ems"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/rMat_20M"
+  - name: "BFS_computeRmat"    # ligra_cf:9, DAMOV stats ligra_BFS_computeRmat
+    binary: "{root}/workloads/ligra/apps/BFS_Compute"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/rMat_20M"
+  - name: "BFS_computeUSA"    # ligra_cf:10, DAMOV stats ligra_BFS_computeUSA
+    binary: "{root}/workloads/ligra/apps/BFS_Compute"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/USA-road-d.USA.gr.parboil_AG"
+  - name: "BFS_edgeMapDenseRmat"    # ligra_cf:11, DAMOV stats ligra_BFS_edgeMapDenseRmat
+    binary: "{root}/workloads/ligra/apps/BFS_Emd"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/rMat_20M"
+  - name: "BFS_edgeMapSparseRmat"    # ligra_cf:12, DAMOV stats ligra_BFS_edgeMapSparseRmat
+    binary: "{root}/workloads/ligra/apps/BFS_Ems"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/rMat_20M"
+  - name: "Components_computeRmat"    # ligra_cf:13, DAMOV stats ligra_Components_computeRmat
+    binary: "{root}/workloads/ligra/apps/Components_Compute"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/rMat_20M"
+  - name: "Components_computeUSA"    # ligra_cf:14, DAMOV stats ligra_Components_computeUSA
+    binary: "{root}/workloads/ligra/apps/Components_Compute"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/USA-road-d.USA.gr.parboil_AG"
+  - name: "Components_edgeMapDenseRmat"    # ligra_cf:15, DAMOV stats ligra_Components_edgeMapDenseRmat
+    binary: "{root}/workloads/ligra/apps/Components_Emd"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/rMat_20M"
+  - name: "Components_edgeMapDenseUSA"    # ligra_cf:16, DAMOV stats ligra_Components_edgeMapDenseUSA
+    binary: "{root}/workloads/ligra/apps/Components_Emd"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/USA-road-d.USA.gr.parboil_AG"
+  - name: "KCore_computeRmat"    # ligra_cf:17, DAMOV stats ligra_KCore_computeRmat
+    binary: "{root}/workloads/ligra/apps/KCore_Compute"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/rMat_20M"
+  - name: "KCore_computeUSA"    # ligra_cf:18, DAMOV stats ligra_KCore_computeUSA
+    binary: "{root}/workloads/ligra/apps/KCore_Compute"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/USA-road-d.USA.gr.parboil_AG"
+  - name: "KCore_edgeMapDenseRmat"    # ligra_cf:19, DAMOV stats ligra_KCore_edgeMapDenseRmat
+    binary: "{root}/workloads/ligra/apps/KCore_Emd"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/rMat_20M"
+  - name: "KCore_edgeMapDenseUSA"    # ligra_cf:20, DAMOV stats ligra_KCore_edgeMapDenseUSA
+    binary: "{root}/workloads/ligra/apps/KCore_Emd"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/USA-road-d.USA.gr.parboil_AG"
+  - name: "KCore_edgeMapSparseRmat"    # ligra_cf:21, DAMOV stats ligra_KCore_edgeMapSparseRmat
+    binary: "{root}/workloads/ligra/apps/KCore_Ems"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/rMat_20M"
+  - name: "MIS_computeRmat"    # ligra_cf:22, DAMOV stats ligra_MIS_computeRmat
+    binary: "{root}/workloads/ligra/apps/MIS_Compute"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/rMat_20M"
+  - name: "MIS_computeUSA"    # ligra_cf:23, DAMOV stats ligra_MIS_computeUSA
+    binary: "{root}/workloads/ligra/apps/MIS_Compute"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/USA-road-d.USA.gr.parboil_AG"
+  - name: "MIS_edgeMapDenseRmat"    # ligra_cf:24, DAMOV stats ligra_MIS_edgeMapDenseRmat
+    binary: "{root}/workloads/ligra/apps/MIS_Emd"
+    options: "-t THREAD S-s {root}/workloads/ligra/inputs/rMat_20M"
+  - name: "MIS_edgeMapDenseUSA"    # ligra_cf:25, DAMOV stats ligra_MIS_edgeMapDenseUSA
+    binary: "{root}/workloads/ligra/apps/MIS_Emd"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/USA-road-d.USA.gr.parboil_AG"
+  - name: "MIS_edgeMapSparseRmat"    # ligra_cf:26, DAMOV stats ligra_MIS_edgeMapSparseRmat
+    binary: "{root}/workloads/ligra/apps/MIS_Ems"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/rMat_20M"
+  - name: "MIS_edgeMapSparseUSA"    # ligra_cf:27, DAMOV stats ligra_MIS_edgeMapSparseUSA
+    binary: "{root}/workloads/ligra/apps/MIS_Ems"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/USA-road-d.USA.gr.parboil_AG"
+  - name: "PageRank_computeRmat"    # ligra_cf:28, DAMOV stats ligra_PageRank_computeRmat
+    binary: "{root}/workloads/ligra/apps/PageRank_Compute"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/rMat_20M"
+  - name: "PageRank_computeUSA"    # ligra_cf:29, DAMOV stats ligra_PageRank_computeUSA
+    binary: "{root}/workloads/ligra/apps/PageRank_Compute"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/USA-road-d.USA.gr.parboil_AG"
+  - name: "PageRank_edgeMapDenseRmat"    # ligra_cf:30, DAMOV stats ligra_PageRank_edgeMapDenseRmat
+    binary: "{root}/workloads/ligra/apps/PageRank_Emd"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/rMat_20M"
+  - name: "PageRank_edgeMapDenseUSA"    # ligra_cf:31, DAMOV stats ligra_PageRank_edgeMapDenseUSA
+    binary: "{root}/workloads/ligra/apps/PageRank_Emd"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/USA-road-d.USA.gr.parboil_AG"
+  - name: "Radii_computeRmat"    # ligra_cf:32, DAMOV stats ligra_Radii_computeRmat
+    binary: "{root}/workloads/ligra/apps/Radii_Compute"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/rMat_20M"
+  - name: "Radii_computeUSA"    # ligra_cf:33, DAMOV stats ligra_Radii_computeUSA
+    binary: "{root}/workloads/ligra/apps/Radii_Compute"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/USA-road-d.USA.gr.parboil_AG"
+  - name: "Radii_edgeMapSparseRmat"    # ligra_cf:34, DAMOV stats ligra_Radii_edgeMapSparseRmat
+    binary: "{root}/workloads/ligra/apps/Radii_Ems"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/rMat_20M"
+  - name: "Radii_edgeMapSparseUSA"    # ligra_cf:35, DAMOV stats ligra_Radii_edgeMapSparseUSA
+    binary: "{root}/workloads/ligra/apps/Radii_Ems"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/USA-road-d.USA.gr.parboil_AG"
+  - name: "Triangle_computeRmat"    # ligra_cf:36, DAMOV stats ligra_Triangle_computeRmat
+    binary: "{root}/workloads/ligra/apps/Triangle_Compute"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/rMat_20M"
+  - name: "Triangle_computeUSA"    # ligra_cf:37, DAMOV stats ligra_Triangle_computeUSA
+    binary: "{root}/workloads/ligra/apps/Triangle_Compute"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/USA-road-d.USA.gr.parboil_AG"
+  - name: "Triangle_edgeMapDenseRmat"    # ligra_cf:38, DAMOV stats ligra_Triangle_edgeMapDenseRmat
+    binary: "{root}/workloads/ligra/apps/Triangle_Emd"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/rMat_20M"
+  - name: "Triangle_edgeMapDenseUSA"    # ligra_cf:39, DAMOV stats ligra_Triangle_edgeMapDenseUSA
+    binary: "{root}/workloads/ligra/apps/Triangle_Emd"
+    options: "-t {threads} -s {root}/workloads/ligra/inputs/USA-road-d.USA.gr.parboil_AG"

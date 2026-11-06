@@ -1,0 +1,47 @@
+# DAMOV2 descriptor for DAMOV suite 'hashjoin', migrated from DAMOV
+# command file(s) hashjoin_cf (biopim/damov@4d611a5) by
+# scripts/migrate_damov.py. {threads} expands to the simulated core count of
+# each job (DAMOV's THREADS); {root} to the DAMOV2 repository root.
+#
+# Binaries must be rebuilt against hooks/compat/zsim_hooks.h (or ported to
+# hooks/damov_hooks.h): ZSim-instrumented builds never trigger the gem5 ROI.
+# See docs/migrating-from-damov.md.
+
+suite: "hashjoin"
+functions:
+  - name: "NPO_knuthshuffle"    # hashjoin_cf:1, DAMOV stats hashjoin_NPO_knuthshuffle
+    binary: "{root}/workloads/multicore-hashjoins-0.1/src/mchashjoins_knuth_shuffle"
+    options: "-a NPO -r 12800000 -s 12000000 -x 12345 -y 54321 -n {threads}"
+  - name: "NPO_lock"    # hashjoin_cf:2, DAMOV stats hashjoin_NPO_lock
+    binary: "{root}/workloads/multicore-hashjoins-0.1/src/mchashjoins_lock"
+    options: "-a NPO -r 12800000 -s 12000000 -x 12345 -y 54321 -n {threads}"
+  - name: "NPO_probehashtable"    # hashjoin_cf:3, DAMOV stats hashjoin_NPO_probehashtable
+    binary: "{root}/workloads/multicore-hashjoins-0.1/src/mchashjoins_probe_hashtable"
+    options: "-a NPO -r 12800000 -s 12000000 -x 12345 -y 54321 -n {threads}"
+  - name: "PRH_knuthshuffle"    # hashjoin_cf:4, DAMOV stats hashjoin_PRH_knuthshuffle
+    binary: "{root}/workloads/multicore-hashjoins-0.1/src/mchashjoins_knuth_shuffle"
+    options: "-a PRH -r 12800000 -s 12000000 -x 12345 -y 54321 -n {threads}"
+  - name: "PRH_lock"    # hashjoin_cf:5, DAMOV stats hashjoin_PRH_lock
+    binary: "{root}/workloads/multicore-hashjoins-0.1/src/mchashjoins_lock"
+    options: "-a PRH -r 12800000 -s 12000000 -x 12345 -y 54321 -n {threads}"
+  - name: "PRH_histogramjoin"    # hashjoin_cf:6, DAMOV stats hashjoin_PRH_histogramjoin
+    binary: "{root}/workloads/multicore-hashjoins-0.1/src/mchashjoins_histogramjoin"
+    options: "-a PRH -r 12800000 -s 12000000 -x 12345 -y 54321 -n {threads}"
+  - name: "PRHO_knuthshuffle"    # hashjoin_cf:7, DAMOV stats hashjoin_PRHO_knuthshuffle
+    binary: "{root}/workloads/multicore-hashjoins-0.1/src/mchashjoins_knuth_shuffle"
+    options: "-a PRHO -r 12800000 -s 12000000 -x 12345 -y 54321 -n {threads}"
+  - name: "PRHO_radixcluster"    # hashjoin_cf:8, DAMOV stats hashjoin_PRHO_radixcluster
+    binary: "{root}/workloads/multicore-hashjoins-0.1/src/mchashjoins_radix_cluster"
+    options: "-a PRHO -r 12800000 -s 12000000 -x 12345 -y 54321 -n {threads}"
+  - name: "PRO_knuthshuffle"    # hashjoin_cf:9, DAMOV stats hashjoin_PRO_knuthshuffle
+    binary: "{root}/workloads/multicore-hashjoins-0.1/src/mchashjoins_knuth_shuffle"
+    options: "-a PRO -r 12800000 -s 12000000 -x 12345 -y 54321 -n {threads}"
+  - name: "PRO_radixcluster"    # hashjoin_cf:10, DAMOV stats hashjoin_PRO_radixcluster
+    binary: "{root}/workloads/multicore-hashjoins-0.1/src/mchashjoins_radix_cluster"
+    options: "-a PRO -r 12800000 -s 12000000 -x 12345 -y 54321 -n {threads}"
+  - name: "PRO_parallelradix_partition"    # hashjoin_cf:11, DAMOV stats hashjoin_PRO_parallelradix_partition
+    binary: "{root}/workloads/multicore-hashjoins-0.1/src/mchashjoins_parallel_radix_partition"
+    options: "-a PRHO -r 12800000 -s 12000000 -x 12345 -y 54321 -n {threads}"
+  - name: "RJ_knuthshuffle"    # hashjoin_cf:12, DAMOV stats hashjoin_RJ_knuthshuffle
+    binary: "{root}/workloads/multicore-hashjoins-0.1/src/mchashjoins_knuth_shuffle"
+    options: "-a RJ -r 12800000 -s 12000000 -x 12345 -y 54321 -n {threads}"

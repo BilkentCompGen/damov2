@@ -32,6 +32,12 @@ export DAMOV2_CPU_TYPE="${DAMOV2_CPU_TYPE:-O3}"
 # Where gem5 outputs and metric tables are written.
 export DAMOV2_OUTPUT_ROOT="${DAMOV2_OUTPUT_ROOT:-$DAMOV2_ROOT/out}"
 
+# Global config file (core sweep, configs, thresholds). Unset = configs/damov.yaml.
+# Point it at a migrated config, e.g. configs/damov_migrated_ooo.yaml, to run
+# the sweep of an original-DAMOV generate_config_files.py
+# (docs/migrating-from-damov.md).
+export DAMOV2_CONFIG="${DAMOV2_CONFIG:-}"
+
 # --- Which benchmark descriptor to characterize ----------------------------
 export DAMOV2_DESCRIPTOR="${DAMOV2_DESCRIPTOR:-$DAMOV2_ROOT/benchmarks/stream.yaml}"
 export DAMOV2_SUITE="${DAMOV2_SUITE:-stream}"
@@ -45,6 +51,9 @@ export SLURM_TIME="${SLURM_TIME:-24:00:00}"
 export SLURM_MEM="${SLURM_MEM:-16G}"               # per array task; raise for 256-core
 export SLURM_CPUS="${SLURM_CPUS:-2}"               # host cores per gem5 process
 export SLURM_MAX_PARALLEL="${SLURM_MAX_PARALLEL:-32}"  # array throttle (%N)
+# Extra sbatch flags for both submissions, word-split, e.g. "-w lisa" to pin a
+# node as DAMOV's template_slurm.slurm did.
+export SLURM_EXTRA_ARGS="${SLURM_EXTRA_ARGS:-}"
 
 # Optional environment modules — uncomment/edit for your site.
 # module load gcc/12 cmake/3.27 python/3.11 2>/dev/null || true

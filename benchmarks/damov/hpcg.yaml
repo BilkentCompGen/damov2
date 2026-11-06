@@ -1,0 +1,26 @@
+# DAMOV2 descriptor for DAMOV suite 'hpcg', migrated from DAMOV
+# command file(s) hpcg_cf (biopim/damov@4d611a5) by
+# scripts/migrate_damov.py. {threads} expands to the simulated core count of
+# each job (DAMOV's THREADS); {root} to the DAMOV2 repository root.
+#
+# Binaries must be rebuilt against hooks/compat/zsim_hooks.h (or ported to
+# hooks/damov_hooks.h): ZSim-instrumented builds never trigger the gem5 ROI.
+# See docs/migrating-from-damov.md.
+
+suite: "hpcg"
+functions:
+  - name: "HPCG_CG"    # hpcg_cf:1, DAMOV stats hpcg_HPCG_CG
+    binary: "{root}/workloads/hpcg/build/bin/xhpcg_HPGCg"
+    options: ""
+  - name: "HPCG_ComputePrologation"    # hpcg_cf:2, DAMOV stats hpcg_HPCG_ComputePrologation
+    binary: "{root}/workloads/hpcg/build/bin/xhpcg_HPGPro"
+    options: ""
+  - name: "HPCG_ComputeRestriction"    # hpcg_cf:3, DAMOV stats hpcg_HPCG_ComputeRestriction
+    binary: "{root}/workloads/hpcg/build/bin/xhpcg_HPGRes"
+    options: ""
+  - name: "HPCG_ComputeSPMV"    # hpcg_cf:4, DAMOV stats hpcg_HPCG_ComputeSPMV
+    binary: "{root}/workloads/hpcg/build/bin/xhpcg_HPGSpm"
+    options: ""
+  - name: "HPCG_ComputeSYMGS"    # hpcg_cf:5, DAMOV stats hpcg_HPCG_ComputeSYMGS
+    binary: "{root}/workloads/hpcg/build/bin/xhpcg_HPGSym"
+    options: ""

@@ -1,0 +1,23 @@
+# DAMOV2 descriptor for DAMOV suite 'hardware-effects', migrated from DAMOV
+# command file(s) hardware_effects_cf (biopim/damov@4d611a5) by
+# scripts/migrate_damov.py. {threads} expands to the simulated core count of
+# each job (DAMOV's THREADS); {root} to the DAMOV2 repository root.
+#
+# Binaries must be rebuilt against hooks/compat/zsim_hooks.h (or ported to
+# hooks/damov_hooks.h): ZSim-instrumented builds never trigger the gem5 ROI.
+# See docs/migrating-from-damov.md.
+
+suite: "hardware-effects"
+functions:
+  - name: "bandwidth_NONTEMPORAL"    # hardware_effects_cf:1, DAMOV stats hardware-effects_bandwidth_NONTEMPORAL
+    binary: "{root}/workloads/hardware-effects/build/bandwidth-saturation/bandwidth-saturation"
+    options: "1 {threads}"
+  - name: "bandwidth_TEMPORAL"    # hardware_effects_cf:2, DAMOV stats hardware-effects_bandwidth_TEMPORAL
+    binary: "{root}/workloads/hardware-effects/build/bandwidth-saturation/bandwidth-saturation"
+    options: "0 {threads}"
+  - name: "false-sharing_SHARED"    # hardware_effects_cf:3, DAMOV stats hardware-effects_false-sharing_SHARED
+    binary: "{root}/workloads/hardware-effects/build/false-sharing/false-sharing"
+    options: "{threads} 1"
+  - name: "false-sharing_ISOLATED"    # hardware_effects_cf:4, DAMOV stats hardware-effects_false-sharing_ISOLATED
+    binary: "{root}/workloads/hardware-effects/build/false-sharing/false-sharing"
+    options: "{threads} 8"

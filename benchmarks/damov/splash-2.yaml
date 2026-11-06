@@ -1,0 +1,53 @@
+# DAMOV2 descriptor for DAMOV suite 'splash-2', migrated from DAMOV
+# command file(s) splash2_cf (biopim/damov@4d611a5) by
+# scripts/migrate_damov.py. {threads} expands to the simulated core count of
+# each job (DAMOV's THREADS); {root} to the DAMOV2 repository root.
+#
+# Binaries must be rebuilt against hooks/compat/zsim_hooks.h (or ported to
+# hooks/damov_hooks.h): ZSim-instrumented builds never trigger the gem5 ROI.
+# See docs/migrating-from-damov.md.
+
+suite: "splash-2"
+functions:
+  - name: "Barnes_computeForces"    # splash2_cf:1, DAMOV stats splash-2_Barnes_computeForces
+    binary: "{root}/workloads/parsec-3.0/ext/splash2x/binaries/barnes/scripts/run_splash2_barnes_computeForces_{threads}_core.sh"
+    options: ""
+  - name: "Barnes_gravsub"    # splash2_cf:2, DAMOV stats splash-2_Barnes_gravsub
+    binary: "{root}/workloads/parsec-3.0/ext/splash2x/apps/barnes/scripts/run_splash2_barnes_gravsub_{threads}_core.sh"
+    options: ""
+  - name: "Oceancp_relax"    # splash2_cf:3, DAMOV stats splash-2_Oceancp_relax
+    binary: "{root}/workloads/parsec-3.0/ext/splash2x/binaries/ocean_cp_relax"
+    options: "-n2050 -p{threads} -e1e-07 -r20000 -t28800"
+  - name: "Oceancp_jacobcalc"    # splash2_cf:4, DAMOV stats splash-2_Oceancp_jacobcalc
+    binary: "{root}/workloads/parsec-3.0/ext/splash2x/binaries/ocean_cp_jacob"
+    options: "-n2050 -p{threads} -e1e-07 -r20000 -t28800"
+  - name: "Oceancp_slave2"    # splash2_cf:5, DAMOV stats splash-2_Oceancp_slave2
+    binary: "{root}/workloads/parsec-3.0/ext/splash2x/binaries/ocean_cp_slave"
+    options: "-n2050 -p{threads} -e1e-07 -r20000 -t28800"
+  - name: "Oceancp_laplaccalc"    # splash2_cf:6, DAMOV stats splash-2_Oceancp_laplaccalc
+    binary: "{root}/workloads/parsec-3.0/ext/splash2x/binaries/ocean_cp_laplace"
+    options: "-n2050 -p{threads} -e1e-07 -r20000 -t28800"
+  - name: "Oceanncp_jacobcalc"    # splash2_cf:7, DAMOV stats splash-2_Oceanncp_jacobcalc
+    binary: "{root}/workloads/parsec-3.0/ext/splash2x/binaries/ocean_ncp_jacob"
+    options: "-n2050 -p{threads} -e1e-07 -r20000 -t28800"
+  - name: "Oceanncp_relax"    # splash2_cf:8, DAMOV stats splash-2_Oceanncp_relax
+    binary: "{root}/workloads/parsec-3.0/ext/splash2x/binaries/ocean_ncp_relax"
+    options: "-n2050 -p{threads} -e1e-07 -r20000 -t28800"
+  - name: "Oceanncp_slave2"    # splash2_cf:9, DAMOV stats splash-2_Oceanncp_slave2
+    binary: "{root}/workloads/parsec-3.0/ext/splash2x/binaries/ocean_ncp_slave"
+    options: "-n2050 -p{threads} -e1e-07 -r20000 -t28800"
+  - name: "Oceanncp_laplaccalc"    # splash2_cf:10, DAMOV stats splash-2_Oceanncp_laplaccalc
+    binary: "{root}/workloads/parsec-3.0/ext/splash2x/binaries/ocean_ncp_laplace"
+    options: "-n2050 -p{threads} -e1e-07 -r20000 -t28800"
+  - name: "Radix_slave_sort"    # splash2_cf:11, DAMOV stats splash-2_Radix_slave_sort
+    binary: "{root}/workloads/parsec-3.0/ext/splash2x/binaries/radix"
+    options: "-p{threads} -r4096 -n67108864 -m2147483647"
+  - name: "FFT_Reverse"    # splash2_cf:12, DAMOV stats splash-2_FFT_Reverse
+    binary: "{root}/workloads/parsec-3.0/ext/splash2x/binaries/fft_reverse"
+    options: "-m24 -p{threads}"
+  - name: "FFT_Transpose"    # splash2_cf:13, DAMOV stats splash-2_FFT_Transpose
+    binary: "{root}/workloads/parsec-3.0/ext/splash2x/binaries/fft_transpose"
+    options: "-m24 -p{threads}"
+  - name: "Lucb_Bmod"    # splash2_cf:14, DAMOV stats splash-2_Lucb_Bmod
+    binary: "{root}/workloads/parsec-3.0/ext/splash2x/binaries/lu_cb"
+    options: "-p{threads} -n2048 -b16"

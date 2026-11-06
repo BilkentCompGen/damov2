@@ -1,0 +1,17 @@
+# DAMOV2 descriptor for DAMOV suite 'gase', migrated from DAMOV
+# command file(s) gase_cf (biopim/damov@4d611a5) by
+# scripts/migrate_damov.py. {threads} expands to the simulated core count of
+# each job (DAMOV's THREADS); {root} to the DAMOV2 repository root.
+#
+# Binaries must be rebuilt against hooks/compat/zsim_hooks.h (or ported to
+# hooks/damov_hooks.h): ZSim-instrumented builds never trigger the gem5 ROI.
+# See docs/migrating-from-damov.md.
+
+suite: "gase"
+functions:
+  - name: "FastMap_occ4FastMapWg1"    # gase_cf:1, DAMOV stats gase_FastMap_occ4FastMapWg1
+    binary: "{root}/workloads/GASE-master/gase_occ4"
+    options: "fastmap {root}/workloads/GASE-master/inputs/hg19.fa {root}/workloads/GASE-master/inputs/wgsim_150_1.fastq"
+  - name: "FastMap_2occ4FastMapWg2"    # gase_cf:2, DAMOV stats gase_FastMap_2occ4FastMapWg2
+    binary: "{root}/workloads/GASE-master/gase_2occ4"
+    options: "fastmap {root}/workloads/GASE-master/inputs/hg19.fa {root}/workloads/GASE-master/inputs/wgsim_150_2.fastq"

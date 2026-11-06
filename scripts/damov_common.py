@@ -117,7 +117,12 @@ def _tiny_yaml(text):
 # Config / descriptor access
 # --------------------------------------------------------------------------- #
 def load_config(path=None):
-    path = path or os.path.join(REPO_ROOT, "configs", "damov.yaml")
+    # An explicit --config wins; DAMOV2_CONFIG lets the SLURM scripts (which
+    # call every stage without --config) pick e.g. a migrated config.
+    path = (path or os.environ.get("DAMOV2_CONFIG")
+            or os.path.join(REPO_ROOT, "configs", "damov.yaml"))
+    if not os.path.exists(path):
+        path = abspath(path)  # relative to the repo root, like descriptors
     cfg = _load_yaml(path)
     cfg.setdefault("output_root", "out")
     cfg.setdefault("cores", [1, 4, 16, 64, 256])

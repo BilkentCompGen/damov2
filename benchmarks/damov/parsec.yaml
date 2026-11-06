@@ -1,0 +1,26 @@
+# DAMOV2 descriptor for DAMOV suite 'parsec', migrated from DAMOV
+# command file(s) parsec_cf (biopim/damov@4d611a5) by
+# scripts/migrate_damov.py. {threads} expands to the simulated core count of
+# each job (DAMOV's THREADS); {root} to the DAMOV2 repository root.
+#
+# Binaries must be rebuilt against hooks/compat/zsim_hooks.h (or ported to
+# hooks/damov_hooks.h): ZSim-instrumented builds never trigger the gem5 ROI.
+# See docs/migrating-from-damov.md.
+
+suite: "parsec"
+functions:
+  - name: "Streamcluster_dist"    # parsec_cf:1, DAMOV stats parsec_Streamcluster_dist
+    binary: "{root}/workloads/parsec-3.0/pkgs/binaries/streamcluster"
+    options: "10 20 128 16384 16384 1000 none {root}/workloads/parsec-3.0/pkgs/outputs/streamcluster/output.txt {threads}"
+  - name: "Bodytrack_FilterRow"    # parsec_cf:2, DAMOV stats parsec_Bodytrack_FilterRow
+    binary: "{root}/workloads/parsec-3.0/pkgs/binaries/bodytrack"
+    options: "{root}/workloads/parsec-3.0/pkgs/inputs/bodytrack/sequenceB_4 4 4 4000 5 0 {threads}"
+  - name: "Ferret_DistL2Float"    # parsec_cf:3, DAMOV stats parsec_Ferret_DistL2Float
+    binary: "{root}/workloads/parsec-3.0/pkgs/binaries/ferret"
+    options: "{root}/workloads/parsec-3.0/pkgs/inputs/ferret/corel lsh {root}/workloads/parsec-3.0/pkgs/inputs/ferret/queries 10 20 {threads} output.txt"
+  - name: "Fluidaminate_ProcessCollision2MT"    # parsec_cf:4, DAMOV stats parsec_Fluidaminate_ProcessCollision2MT
+    binary: "{root}/workloads/parsec-3.0/pkgs/binaries/fluidanimate"
+    options: "{threads} 5 {root}/workloads/parsec-3.0/pkgs/inputs/fluidanimate/in_300K.fluid out.fluid"
+  - name: "Blackscholes_BlkSchlsEqEuroNoDiv"    # parsec_cf:5, DAMOV stats parsec_Blackscholes_BlkSchlsEqEuroNoDiv
+    binary: "{root}/workloads/parsec-3.0/pkgs/binaries/blackscholes"
+    options: "{threads} {root}/workloads/parsec-3.0/pkgs/inputs/blackscholes/in_64K.txt {root}/workloads/parsec-3.0/pkgs/outputs/blackscholes/prices.txt"

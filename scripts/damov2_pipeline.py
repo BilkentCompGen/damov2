@@ -41,6 +41,8 @@ def main():
     desc = dc.load_descriptor(dc.abspath(args.descriptor))
     suite = desc["suite"]
     here = os.path.dirname(os.path.abspath(__file__))
+    # Forward --config so the sub-stages see the same output_root/paths.
+    cfg_opt = ["--config", os.path.abspath(args.config)] if args.config else []
 
     # 1. plan
     plan = generate_configs.build_plan(cfg, desc)
@@ -57,7 +59,8 @@ def main():
         for stage in ("trace", "scale"):
             rc = run([sys.executable, os.path.join(here, "run_experiment.py"),
                       "--plan", plan_path, "--stage", stage,
-                      "--continue-on-error"] + (["--dry-run"] if args.dry_run else []),
+                      "--continue-on-error"] + cfg_opt
+                     + (["--dry-run"] if args.dry_run else []),
                      dry=False)
             if rc != 0 and not args.dry_run:
                 dc.eprint(f"simulation stage '{stage}' returned {rc}")
@@ -72,7 +75,8 @@ def main():
         locality = os.path.join(dc.abspath(cfg["output_root"]), suite, f"{name}.locality.csv")
         run([sys.executable, os.path.join(here, "collect_stats.py"),
              "--suite", suite, "--function", name,
-             "--metrics", metrics, "--locality", locality], dry=args.dry_run)
+             "--metrics", metrics, "--locality", locality] + cfg_opt,
+            dry=args.dry_run)
         run([classify_tool, "--metrics", metrics, "--locality", locality,
              "--config", cfg["classify_config"],
              "--tl-th", th.get("temporal_locality", 0.48),

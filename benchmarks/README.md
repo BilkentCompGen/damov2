@@ -19,6 +19,22 @@ functions:
     class: 1a                       # expected DAMOV class (for validation)
 ```
 
+`binary`, `options` and `input` may use two placeholders, expanded per job by
+`scripts/generate_configs.py`:
+
+| Placeholder | Expands to |
+|-------------|------------|
+| `{threads}` | the job's simulated core count (`1` for the Step-2 trace job); DAMOV's `THREADS` |
+| `{root}`    | the absolute DAMOV2 repository root |
+
+## Migrated DAMOV descriptors
+
+[`damov/`](damov/) holds descriptors converted from the original DAMOV's
+`simulator/command_files/` (biopim/damov@4d611a5, 151 functions in 16 suites) by
+`scripts/migrate_damov.py`. Their binaries live under `workloads/` and must be
+rebuilt against `hooks/compat/zsim_hooks.h` first. See
+[../docs/migrating-from-damov.md](../docs/migrating-from-damov.md).
+
 Input-set sizes match the paper's Tables 2–7 (e.g. STREAM `50000000`, Ligra
 `rMat`/`USA`, PolyBench `LARGE_DATASET`).
 

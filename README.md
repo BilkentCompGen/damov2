@@ -26,6 +26,12 @@ prefetcher, or Near-Data Processing / PIM) can be chosen.
 The DAMOV *methodology* is preserved exactly (same metrics, same six-class
 decision tree); only the simulators and the surrounding tooling are modernized.
 
+**Coming from the original DAMOV?** [docs/migrating-from-damov.md](docs/migrating-from-damov.md)
+maps command files, `generate_config_files.py`, the ZSim templates, the hooks and
+the SLURM flow onto DAMOV2. `scripts/migrate_damov.py` converts the command files
+and generator sweep, and `hooks/compat/zsim_hooks.h` lets zsim-instrumented
+workloads rebuild for gem5 unchanged.
+
 ## The three-step methodology
 
 ```
@@ -69,6 +75,7 @@ MPKI `11.0`, AI `8.5`.
 ```
 damov2/
 ├── hooks/damov_hooks.h        # ROI markers for workloads (gem5 m5ops)
+├── hooks/compat/zsim_hooks.h  # original-DAMOV hook API on top of damov_hooks.h
 ├── include/damov/             # C++17 core library public headers
 ├── src/                       # C++17 core library + CLI tools
 │   ├── trace/                 # memory-trace reader
@@ -87,9 +94,12 @@ damov2/
 ├── workloads/STREAM/          # instrumented example workload (untracked; see .gitignore)
 ├── examples/hello/            # "hello world" workload + toolchain smoke test
 ├── configs/damov.yaml         # global config (core counts, thresholds, paths)
+├── configs/damov_migrated_*.yaml # sweep migrated from DAMOV's generator (per core version)
+├── benchmarks/damov/          # descriptors migrated from DAMOV's command_files/
 ├── tests/                     # unit tests (locality, classify, metrics)
 ├── INSTALL.md                 # prerequisites per tier, and how to remove them
-└── docs/methodology.md        # detailed algorithm/metric documentation
+├── docs/methodology.md        # detailed algorithm/metric documentation
+└── docs/migrating-from-damov.md # guide for users of the original (ZSim) DAMOV
 ```
 
 ## Dependencies
@@ -285,6 +295,8 @@ that file to change the experiment — no code changes needed. Several of them
 (the paths, `cpu_type`, `ramulator_config`) also honor a per-run `DAMOV2_*`
 environment-variable override (e.g. `DAMOV2_GEM5_BIN`, `DAMOV2_CPU_TYPE`,
 `DAMOV2_RAMULATOR_CONFIG`); `cores` and `thresholds` are set only in the file.
+To use a different config file, pass `--config` to the scripts or, for the
+SLURM scripts, set `DAMOV2_CONFIG`.
 
 | Parameter | What it controls | Default |
 |-----------|------------------|---------|

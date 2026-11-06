@@ -12,7 +12,7 @@ actually installed *here* and how to undo it.
 Verify what currently works at any time with:
 
 ```bash
-scripts/smoke_test.sh        # 20 checks; skips (not fails) on missing prereqs
+scripts/smoke_test.sh        # 25 checks; skips (not fails) on missing prereqs
 ```
 
 ---

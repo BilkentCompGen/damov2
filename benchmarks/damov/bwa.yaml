@@ -1,0 +1,41 @@
+# DAMOV2 descriptor for DAMOV suite 'bwa', migrated from DAMOV
+# command file(s) bwa_cf, bwamem_cf (biopim/damov@4d611a5) by
+# scripts/migrate_damov.py. {threads} expands to the simulated core count of
+# each job (DAMOV's THREADS); {root} to the DAMOV2 repository root.
+#
+# Binaries must be rebuilt against hooks/compat/zsim_hooks.h (or ported to
+# hooks/damov_hooks.h): ZSim-instrumented builds never trigger the gem5 ROI.
+# See docs/migrating-from-damov.md.
+
+suite: "bwa"
+functions:
+  - name: "Align_AlignWg1"    # bwa_cf:1, DAMOV stats bwa_Align_AlignWg1
+    binary: "{root}/workloads/bwa/bwa"
+    options: "aln -t {threads} {root}/workloads/GASE-master/inputs/hg19.fa {root}/workloads/GASE-master/inputs/wgsim_150_1.fastq"
+  - name: "Align_AlignWg2"    # bwa_cf:2, DAMOV stats bwa_Align_AlignWg2
+    binary: "{root}/workloads/bwa/bwa"
+    options: "aln -t {threads} {root}/workloads/GASE-master/inputs/hg19.fa {root}/workloads/GASE-master/inputs/wgsim_150_2.fastq"
+  - name: "MEM_bwt_sa2_SRR1514950"    # bwamem_cf:1, DAMOV stats bwa_MEM_bwt_sa2_SRR1514950
+    binary: "{root}/workloads/bwa-0.7.17/bwa"
+    options: "mem -t {threads} {root}/workloads/../data/chm1_reads/CHM1_1.1.fasta {root}/workloads/../data/chm1_reads/SRR1514950_CHM1_Illumina_WGS_UW__1.fastq.gz {root}/workloads/../data/chm1_reads/SRR1514950_CHM1_Illumina_WGS_UW__2.fastq.gz -o {root}/workloads/../data/chm1_reads/SRR1514950_{threads}.sam"
+  - name: "MEM_bwt_sa2_SRR1514951"    # bwamem_cf:2, DAMOV stats bwa_MEM_bwt_sa2_SRR1514951
+    binary: "{root}/workloads/bwa-0.7.17/bwa"
+    options: "mem -t {threads} {root}/workloads/../data/chm1_reads/CHM1_1.1.fasta {root}/workloads/../data/chm1_reads/SRR1514951_CHM1_Illumina_WGS_UW__1.fastq.gz {root}/workloads/../data/chm1_reads/SRR1514951_CHM1_Illumina_WGS_UW__2.fastq.gz -o {root}/workloads/../data/chm1_reads/SRR1514951_{threads}.sam"
+  - name: "MEM_bwt_sa2_SRR1514952"    # bwamem_cf:3, DAMOV stats bwa_MEM_bwt_sa2_SRR1514952
+    binary: "{root}/workloads/bwa-0.7.17/bwa"
+    options: "mem -t {threads} {root}/workloads/../data/chm1_reads/CHM1_1.1.fasta {root}/workloads/../data/chm1_reads/SRR1514952_CHM1_Illumina_WGS_UW__1.fastq.gz {root}/workloads/../data/chm1_reads/SRR1514952_CHM1_Illumina_WGS_UW__2.fastq.gz -o {root}/workloads/../data/chm1_reads/SRR1514952_{threads}.sam"
+  - name: "MEM_bwt_sa2_chm1"    # bwamem_cf:4, DAMOV stats bwa_MEM_bwt_sa2_chm1
+    binary: "{root}/workloads/bwa-0.7.17/bwa"
+    options: "mem -t {threads} {root}/workloads/../data/chm1_reads/CHM1_1.1.fasta {root}/workloads/../data/chm1_reads/paired_dat1.fq.gz {root}/workloads/../data/chm1_reads/paired_dat2.fq.gz -o {root}/workloads/../data/chm1_reads/paired_{threads}.sam"
+  - name: "MEM_bwt_sa2_ecoli1"    # bwamem_cf:5, DAMOV stats bwa_MEM_bwt_sa2_ecoli1
+    binary: "{root}/workloads/bwa-0.7.17/bwa"
+    options: "mem -t {threads} {root}/workloads/../data/ecoli/GCF_000005845.2_ASM584v2_genomic.fna.gz {root}/workloads/../data/ecoli/SRR30895486.fastq.gz -o {root}/workloads/../data/ecoli/SRR30895486_{threads}.sam"
+  - name: "MEM_bwt_sa2_ecoli2"    # bwamem_cf:6, DAMOV stats bwa_MEM_bwt_sa2_ecoli2
+    binary: "{root}/workloads/bwa-0.7.17/bwa"
+    options: "mem -t {threads} {root}/workloads/../data/ecoli/GCF_000005845.2_ASM584v2_genomic.fna.gz {root}/workloads/../data/ecoli/SRR30895487.fastq.gz -o {root}/workloads/../data/ecoli/SRR30895487_{threads}.sam"
+  - name: "MEM_bwt_sa2_ecoli3"    # bwamem_cf:7, DAMOV stats bwa_MEM_bwt_sa2_ecoli3
+    binary: "{root}/workloads/bwa-0.7.17/bwa"
+    options: "mem -t {threads} {root}/workloads/../data/ecoli/GCF_000005845.2_ASM584v2_genomic.fna.gz {root}/workloads/../data/ecoli/paired_dat1.fq.gz {root}/workloads/../data/ecoli/paired_dat2.fq.gz -o {root}/workloads/../data/ecoli/paired_{threads}.sam"
+  - name: "MEM_bwt_sa2_celegans"    # bwamem_cf:8, DAMOV stats bwa_MEM_bwt_sa2_celegans
+    binary: "{root}/workloads/bwa-0.7.17/bwa"
+    options: "mem -t {threads} {root}/workloads/../data/celegans/GCF_000002985.6_WBcel235_genomic.fna.gz {root}/workloads/../data/celegans/paired_dat1.fq.gz {root}/workloads/../data/celegans/paired_dat2.fq.gz -o {root}/workloads/../data/celegans/paired_{threads}.sam"

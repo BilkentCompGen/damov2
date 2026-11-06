@@ -1,0 +1,44 @@
+# DAMOV2 descriptor for DAMOV suite 'rodinia', migrated from DAMOV
+# command file(s) rodinia_cf (biopim/damov@4d611a5) by
+# scripts/migrate_damov.py. {threads} expands to the simulated core count of
+# each job (DAMOV's THREADS); {root} to the DAMOV2 repository root.
+#
+# Binaries must be rebuilt against hooks/compat/zsim_hooks.h (or ported to
+# hooks/damov_hooks.h): ZSim-instrumented builds never trigger the gem5 ROI.
+# See docs/migrating-from-damov.md.
+
+suite: "rodinia"
+functions:
+  - name: "Backprop_layerfoward"    # rodinia_cf:1, DAMOV stats rodinia_Backprop_layerfoward
+    binary: "{root}/workloads/rodinia_3.1/openmp/backprop/backprop_layerforward"
+    options: "134217728 {threads}"
+  - name: "Backprop_adjustWeights"    # rodinia_cf:2, DAMOV stats rodinia_Backprop_adjustWeights
+    binary: "{root}/workloads/rodinia_3.1/openmp/backprop/backprop_adjust_weights"
+    options: "134217728 {threads}"
+  - name: "BFS_BFS"    # rodinia_cf:3, DAMOV stats rodinia_BFS_BFS
+    binary: "{root}/workloads/rodinia_3.1/openmp/bfs/bfs"
+    options: "{threads} {root}/workloads/rodinia_3.1/data/bfs/graph1MW_6.txt"
+  - name: "CFD_CFD"    # rodinia_cf:4, DAMOV stats rodinia_CFD_CFD
+    binary: "{root}/workloads/rodinia_3.1/openmp/cfd/euler3d_cpu"
+    options: "{root}/workloads/rodinia_3.1/data/cfd/fvcorr.domn.193K {threads}"
+  - name: "Kmeans_Kmeans"    # rodinia_cf:5, DAMOV stats rodinia_Kmeans_Kmeans
+    binary: "{root}/workloads/rodinia_3.1/openmp/kmeans/kmeans_openmp/kmeans_kmeans"
+    options: "-n {threads} -i {root}/workloads/rodinia_3.1/data/kmeans/819200.txt"
+  - name: "Kmeans_euclidDist"    # rodinia_cf:6, DAMOV stats rodinia_Kmeans_euclidDist
+    binary: "{root}/workloads/rodinia_3.1/openmp/kmeans/kmeans_openmp/kmeans_euclid"
+    options: "-n {threads} -i {root}/workloads/rodinia_3.1/data/kmeans/819200.txt"
+  - name: "Kmeans_find"    # rodinia_cf:7, DAMOV stats rodinia_Kmeans_find
+    binary: "{root}/workloads/rodinia_3.1/openmp/kmeans/kmeans_openmp/kmeans_find"
+    options: "-n {threads} -i {root}/workloads/rodinia_3.1/data/kmeans/819200.txt"
+  - name: "Myocyte_master"    # rodinia_cf:8, DAMOV stats rodinia_Myocyte_master
+    binary: "{root}/workloads/rodinia_3.1/openmp/myocyte/myocyte.out_master"
+    options: "1000000 1 0 {threads}"
+  - name: "Myocyte_fin"    # rodinia_cf:9, DAMOV stats rodinia_Myocyte_fin
+    binary: "{root}/workloads/rodinia_3.1/openmp/myocyte/myocyte.out_fin"
+    options: "1000000 1 0 {threads}"
+  - name: "Srad_FIN"    # rodinia_cf:10, DAMOV stats rodinia_Srad_FIN
+    binary: "{root}/workloads/rodinia_3.1/openmp/srad/srad_v1/srad"
+    options: "100 0.5 5020 4580 {threads}"
+  - name: "StreamCluster_pengain"    # rodinia_cf:11, DAMOV stats rodinia_StreamCluster_pengain
+    binary: "{root}/workloads/rodinia_3.1/openmp/streamcluster/sc_omp"
+    options: "10 20 256 65536 65536 1000 none output.txt {threads}"

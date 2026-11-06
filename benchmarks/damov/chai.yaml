@@ -1,0 +1,68 @@
+# DAMOV2 descriptor for DAMOV suite 'chai', migrated from DAMOV
+# command file(s) chai_cf (biopim/damov@4d611a5) by
+# scripts/migrate_damov.py. {threads} expands to the simulated core count of
+# each job (DAMOV's THREADS); {root} to the DAMOV2 repository root.
+#
+# Binaries must be rebuilt against hooks/compat/zsim_hooks.h (or ported to
+# hooks/damov_hooks.h): ZSim-instrumented builds never trigger the gem5 ROI.
+# See docs/migrating-from-damov.md.
+
+suite: "chai"
+functions:
+  - name: "BFS_BFS"    # chai_cf:1, DAMOV stats chai_BFS_BFS
+    binary: "{root}/workloads/chai-cpu/BFS/bfs_00"
+    options: "-f {root}/workloads/chai-cpu/BFS/input/USA-road-d.USA.gr.parboil -t {threads} -w 0 -r 1"
+  - name: "BFS_COMP"    # chai_cf:2, DAMOV stats chai_BFS_COMP
+    binary: "{root}/workloads/chai-cpu/BFS/bfs_01"
+    options: "-f {root}/workloads/chai-cpu/BFS/input/USA-road-d.USA.gr.parboil -t {threads} -w 0 -r 1"
+  - name: "BFS_FETCH"    # chai_cf:3, DAMOV stats chai_BFS_FETCH
+    binary: "{root}/workloads/chai-cpu/BFS/bfs_02"
+    options: "-f {root}/workloads/chai-cpu/BFS/input/USA-road-d.USA.gr.parboil -t {threads} -w 0 -r 1"
+  - name: "BFS_LOAD"    # chai_cf:4, DAMOV stats chai_BFS_LOAD
+    binary: "{root}/workloads/chai-cpu/BFS/bfs_03"
+    options: "-f {root}/workloads/chai-cpu/BFS/input/USA-road-d.USA.gr.parboil -t {threads} -w 0 -r 1"
+  - name: "BS_BEZIER_KERNEL"    # chai_cf:5, DAMOV stats chai_BS_BEZIER_KERNEL
+    binary: "{root}/workloads/chai-cpu/BS/bs"
+    options: "-t {threads} -w 0 -r 1"
+  - name: "TRNS_TRNS"    # chai_cf:6, DAMOV stats chai_TRNS_TRNS
+    binary: "{root}/workloads/chai-cpu/OOPTRNS/ooptrns"
+    options: "-m 1024 -n 524288 - {threads} -w 0 -r 1"
+  - name: "TRNS_CPU"    # chai_cf:7, DAMOV stats chai_TRNS_CPU
+    binary: "{root}/workloads/chai-cpu/OOPTRNS/ooptrns_02"
+    options: "-m 1024 -n 524288 - {threads} -w 0 -r 1"
+  - name: "CEDD_Gaussian"    # chai_cf:8, DAMOV stats chai_CEDD_Gaussian
+    binary: "{root}/workloads/chai-cpu/CEDD/cedd_01"
+    options: "-t {threads} -f {root}/workloads/chai-cpu/CEDD/input/peppa/ -w 0 -r 1"
+  - name: "CEDD_Sobel"    # chai_cf:9, DAMOV stats chai_CEDD_Sobel
+    binary: "{root}/workloads/chai-cpu/CEDD/cedd_02"
+    options: "-t {threads} -f {root}/workloads/chai-cpu/CEDD/input/peppa/ -w 0 -r 1"
+  - name: "CEDD_Supression"    # chai_cf:10, DAMOV stats chai_CEDD_Supression
+    binary: "{root}/workloads/chai-cpu/CEDD/cedd_03"
+    options: "-t {threads} -f {root}/workloads/chai-cpu/CEDD/input/peppa/ -w 0 -r 1"
+  - name: "CEDD_Hystresis"    # chai_cf:11, DAMOV stats chai_CEDD_Hystresis
+    binary: "{root}/workloads/chai-cpu/CEDD/cedd_04"
+    options: "-t {threads} -f {root}/workloads/chai-cpu/CEDD/input/peppa/ -w 0 -r 1"
+  - name: "HSTI_HSTI"    # chai_cf:12, DAMOV stats chai_HSTI_HSTI
+    binary: "{root}/workloads/chai-cpu/HSTI/hsti"
+    options: "-t {threads} -w 0 -r 1"
+  - name: "HSTO_HSTO"    # chai_cf:13, DAMOV stats chai_HSTO_HSTO
+    binary: "{root}/workloads/chai-cpu/HSTO/hsto"
+    options: "-t {threads} -w 0 -r 1"
+  - name: "OOPPAD_OOPPAD"    # chai_cf:14, DAMOV stats chai_OOPPAD_OOPPAD
+    binary: "{root}/workloads/chai-cpu/OOPPAD/ooppad"
+    options: "-t {threads} -w 0 -r 1 -m 10000 -n 9999"
+  - name: "SC_SC"    # chai_cf:15, DAMOV stats chai_SC_SC
+    binary: "{root}/workloads/chai-cpu/SC/sc"
+    options: "-t {threads} -w 0 -r 1"
+  - name: "SELECT_SELECT"    # chai_cf:16, DAMOV stats chai_SELECT_SELECT
+    binary: "{root}/workloads/chai-cpu/SELECT/sri"
+    options: "-n 67108864 -t {threads} -w 0 -r 1"
+  - name: "SELECT_FETCH_ADD"    # chai_cf:17, DAMOV stats chai_SELECT_FETCH_ADD
+    binary: "{root}/workloads/chai-cpu/SELECT/sri_fetch_add"
+    options: "-n 67108864 -t {threads} -w 0 -r 1"
+  - name: "VPACK_VPACK"    # chai_cf:18, DAMOV stats chai_VPACK_VPACK
+    binary: "{root}/workloads/chai-cpu/VPACK/vpack"
+    options: "-t {threads} -m 268435456 -n 16777216 -w 0 -r 1"
+  - name: "VUPACK_VUPACK"    # chai_cf:19, DAMOV stats chai_VUPACK_VUPACK
+    binary: "{root}/workloads/chai-cpu/VUPACK/vupack"
+    options: "-t {threads} -m 268435456 -n 16777216 -w 0 -r 1"

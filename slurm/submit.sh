@@ -25,12 +25,14 @@ fi
 N=$(wc -l < "$JOBLIST")
 LAST=$(( N - 1 ))
 
-ACCT_OPT=()
-[[ -n "$SLURM_ACCOUNT" ]] && ACCT_OPT=(--account="$SLURM_ACCOUNT")
+SBATCH_OPT=()
+[[ -n "$SLURM_ACCOUNT" ]] && SBATCH_OPT=(--account="$SLURM_ACCOUNT")
+read -r -a EXTRA_OPT <<< "$SLURM_EXTRA_ARGS"
+SBATCH_OPT+=("${EXTRA_OPT[@]}")
 
 echo "==> Submitting simulation array (0-$LAST, throttle %$SLURM_MAX_PARALLEL)"
 SIM_JID=$(sbatch --parsable \
-    --partition="$SLURM_PARTITION" "${ACCT_OPT[@]}" \
+    --partition="$SLURM_PARTITION" "${SBATCH_OPT[@]}" \
     --time="$SLURM_TIME" --mem="$SLURM_MEM" --cpus-per-task="$SLURM_CPUS" \
     --array="0-${LAST}%${SLURM_MAX_PARALLEL}" \
     --export=ALL,DAMOV2_ROOT="$DAMOV2_ROOT",JOBLIST="$JOBLIST" \
@@ -39,7 +41,7 @@ echo "    array job id: $SIM_JID"
 
 echo "==> Submitting analysis job (afterok:$SIM_JID)"
 ANA_JID=$(sbatch --parsable \
-    --partition="$SLURM_PARTITION" "${ACCT_OPT[@]}" \
+    --partition="$SLURM_PARTITION" "${SBATCH_OPT[@]}" \
     --time="02:00:00" --mem="8G" \
     --dependency="afterok:${SIM_JID}" \
     --export=ALL,DAMOV2_ROOT="$DAMOV2_ROOT" \

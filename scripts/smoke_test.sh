@@ -222,6 +222,53 @@ else
 fi
 
 # --------------------------------------------------------------------------- #
+stage "10. Migration from original DAMOV (command file -> descriptor) [REAL]"
+# --------------------------------------------------------------------------- #
+# A DAMOV command file + generator in miniature: PIM_ROOT and THREADS must turn
+# into a descriptor whose plan carries the per-job core count in the options.
+MIG="$OUT/migrate"; rm -rf "$MIG"; mkdir -p "$MIG"   # fresh: a --keep run leaves outputs
+printf 'hello,Hello,stream,PIM_ROOT/hello_damov stream 4096 THREADS\n' >"$MIG/hello_cf"
+printf 'number_of_cores = [1, 8]\nversions = ["ooo"]\nplatforms = ["host_{0}/no_prefetch", "pim_{0}"]\n' \
+    >"$MIG/generate_config_files.py"
+if python3 scripts/migrate_damov.py "$MIG/hello_cf" --generator "$MIG/generate_config_files.py" \
+       --pim-root '{root}/examples/hello' --out-dir "$MIG" --config-prefix "$MIG/cfg" \
+       >"$MIG/migrate.out" 2>&1 \
+   && DAMOV2_OUTPUT_ROOT="$MIG/out" python3 scripts/generate_configs.py \
+       --descriptor "$MIG/hello.yaml" --config "$MIG/cfg_ooo.yaml" \
+       --out "$MIG/plan.json" >/dev/null 2>&1; then
+    pass "migrate_damov.py: command file + generator -> descriptor + config"
+    # 1 function x (1 trace + 2 configs x 2 core counts) = 5
+    njobs=$(python3 -c "import json;print(len(json.load(open('$MIG/plan.json'))['jobs']))")
+    check_num "migrated plan job count" "$njobs" 5 5
+    # Compare resolved paths: {root} comes from Python's cwd, which resolves
+    # symlinks, while $ROOT is bash's logical pwd (e.g. a symlinked home).
+    opts=$(python3 -c "import json, os
+j=[x for x in json.load(open('$MIG/plan.json'))['jobs'] if x['cores']==8][0]
+same=os.path.realpath(j['binary'])==os.path.realpath('$ROOT/examples/hello/hello_damov')
+print(j['options'] if same else 'bad binary '+j['binary'])")
+    check_str "THREADS/PIM_ROOT expanded (8-core job)" "$opts" "stream 4096 8"
+else
+    fail "migrate_damov.py pipeline failed"
+    sed 's/^/        /' "$MIG/migrate.out" >&2
+fi
+if cc -Wall -Wextra -Werror -Ihooks/compat -Ihooks -x c - -o "$MIG/zsim_compat" \
+       >/dev/null 2>&1 <<'EOF'
+#include "zsim_hooks.h"
+int main(void)
+{
+    zsim_roi_begin(); zsim_PIM_function_begin();
+    zsim_PIM_function_end(); zsim_roi_end();
+    zsim_begin(); zsim_end(); zsim_heartbeat();
+    return 0;
+}
+EOF
+then
+    pass "hooks/compat/zsim_hooks.h builds DAMOV-instrumented code"
+else
+    fail "hooks/compat/zsim_hooks.h does not compile"
+fi
+
+# --------------------------------------------------------------------------- #
 printf "\n${BLD}================ summary ================${RST}\n"
 printf "  ${GRN}passed  %d${RST}\n  ${RED}failed  %d${RST}\n  ${YLW}skipped %d${RST}\n" \
        "$PASS" "$FAIL" "$SKIP"

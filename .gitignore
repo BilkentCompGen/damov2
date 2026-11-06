@@ -41,6 +41,7 @@ env/
 
 # DAMOV2 simulator outputs & downloaded workloads
 out/
+out-*/
 m5out/
 *.zsim.out
 *.proto.gz

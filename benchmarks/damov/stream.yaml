@@ -1,0 +1,23 @@
+# DAMOV2 descriptor for DAMOV suite 'stream', migrated from DAMOV
+# command file(s) stream_cf (biopim/damov@4d611a5) by
+# scripts/migrate_damov.py. {threads} expands to the simulated core count of
+# each job (DAMOV's THREADS); {root} to the DAMOV2 repository root.
+#
+# Binaries must be rebuilt against hooks/compat/zsim_hooks.h (or ported to
+# hooks/damov_hooks.h): ZSim-instrumented builds never trigger the gem5 ROI.
+# See docs/migrating-from-damov.md.
+
+suite: "stream"
+functions:
+  - name: "Add_Add"    # stream_cf:1, DAMOV stats stream_Add_Add
+    binary: "{root}/workloads/STREAM/stream_add"
+    options: "{threads}"
+  - name: "Copy_Copy"    # stream_cf:2, DAMOV stats stream_Copy_Copy
+    binary: "{root}/workloads/STREAM/stream_copy"
+    options: "{threads}"
+  - name: "Scale_Scale"    # stream_cf:3, DAMOV stats stream_Scale_Scale
+    binary: "{root}/workloads/STREAM/stream_scale"
+    options: "{threads}"
+  - name: "Triad_Triad"    # stream_cf:4, DAMOV stats stream_Triad_Triad
+    binary: "{root}/workloads/STREAM/stream_triad"
+    options: "{threads}"

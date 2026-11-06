@@ -21,7 +21,7 @@ Treat that file as the spec: if you change what `damov-locality`,
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
 ctest --test-dir build            # 3 unit tests: locality, classify, metrics
-scripts/smoke_test.sh             # 20 end-to-end checks on examples/hello
+scripts/smoke_test.sh             # 25 end-to-end checks on examples/hello
 ```
 
 `scripts/smoke_test.sh` is the integration test: it drives the hello-world
@@ -82,6 +82,10 @@ benchmarks/<suite>.yaml                     descriptor (functions to characteriz
 [export_joblist.py](scripts/export_joblist.py) flattens a plan into one gem5
 command per line for SLURM arrays; [proto2trace.py](scripts/proto2trace.py)
 converts a gem5 protobuf packet trace to the text format `TraceReader` expects.
+[migrate_damov.py](scripts/migrate_damov.py) converts original-DAMOV command
+files and `generate_config_files.py` sweeps into `benchmarks/damov/*.yaml` and
+`configs/damov_migrated_*.yaml`; the user guide is
+[docs/migrating-from-damov.md](docs/migrating-from-damov.md).
 
 Output layout (from `damov_common.out_dir`, do not reinvent it):
 
@@ -116,6 +120,12 @@ contract with `damov_se.py` — changing one requires changing the other.
   stat name; user overrides go through `damov-stats --patterns`
   ([configs/stat_patterns.example.ini](configs/stat_patterns.example.ini)
   mirrors the defaults and should be kept in sync).
+- **Descriptor placeholders** `{threads}` (job core count, 1 for the trace job)
+  and `{root}` (repo root) are expanded by `generate_configs.expand` via plain
+  `str.replace`, never `str.format`, so literal braces in workload arguments
+  survive. `migrate_damov.py` maps DAMOV's `THREADS`/`PIM_ROOT` onto them.
+- **`hooks/compat/zsim_hooks.h`** re-implements DAMOV's `zsim_*` hook API on top
+  of `damov_hooks.h`; keep the two in sync if the damov hook set changes.
 - **`workloads/` and `out/` are gitignored** (see [.gitignore](.gitignore)).
   The instrumented STREAM example under `workloads/STREAM/` is therefore
   untracked local content even though the README describes it — don't assume a

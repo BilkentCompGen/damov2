@@ -1,0 +1,23 @@
+# DAMOV2 descriptor for DAMOV suite 'darknet', migrated from DAMOV
+# command file(s) darknet_cf (biopim/damov@4d611a5) by
+# scripts/migrate_damov.py. {threads} expands to the simulated core count of
+# each job (DAMOV's THREADS); {root} to the DAMOV2 repository root.
+#
+# Binaries must be rebuilt against hooks/compat/zsim_hooks.h (or ported to
+# hooks/damov_hooks.h): ZSim-instrumented builds never trigger the gem5 ROI.
+# See docs/migrating-from-damov.md.
+
+suite: "darknet"
+functions:
+  - name: "alexnet_gemm_nn"    # darknet_cf:1, DAMOV stats darknet_alexnet_gemm_nn
+    binary: "{root}/workloads/Darknet/darknet"
+    options: "detect {root}/workloads/Darknet/cfg/alexnet.cfg {root}/workloads/Darknet/weights/alexnet.weights {root}/workloads/Darknet/data/dog.jpg"
+  - name: "vgg16_gemm_nn"    # darknet_cf:2, DAMOV stats darknet_vgg16_gemm_nn
+    binary: "{root}/workloads/Darknet/darknet"
+    options: "detect {root}/workloads/Darknet/cfg/vgg-16.cfg {root}/workloads/Darknet/weights/vgg-16.weights {root}/workloads/Darknet/data/dog.jpg"
+  - name: "resnet152_gemm_nn"    # darknet_cf:3, DAMOV stats darknet_resnet152_gemm_nn
+    binary: "{root}/workloads/Darknet/darknet"
+    options: "detect {root}/workloads/Darknet/cfg/resnet152.cfg {root}/workloads/Darknet/weights/resnet152.weights {root}/workloads/Darknet/data/dog.jpg"
+  - name: "yolo_gemm_nn"    # darknet_cf:4, DAMOV stats darknet_yolo_gemm_nn
+    binary: "{root}/workloads/Darknet/darknet"
+    options: "detect {root}/workloads/Darknet/cfg/yolo.cfg {root}/workloads/Darknet/weights/yolo.weights {root}/workloads/Darknet/data/dog.jpg"

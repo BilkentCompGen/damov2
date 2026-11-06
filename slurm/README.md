@@ -24,8 +24,10 @@ Edit [`env.sh`](env.sh) (or export the variables before submitting):
 | `DAMOV2_RAMULATOR_CONFIG` | memory model: preset `hmc`/`hbm2`/`ddr4` or a config path (default: `hmc`) |
 | `DAMOV2_CPU_TYPE` | `O3` (out-of-order) or `Timing` (in-order) |
 | `DAMOV2_DESCRIPTOR` / `DAMOV2_SUITE` | which benchmark descriptor to run |
+| `DAMOV2_CONFIG` | global config file (default `configs/damov.yaml`), e.g. `configs/damov_migrated_ooo.yaml` |
 | `SLURM_PARTITION`, `SLURM_ACCOUNT`, `SLURM_TIME`, `SLURM_MEM`, `SLURM_CPUS` | job resources |
 | `SLURM_MAX_PARALLEL` | array throttle (`%N` — max concurrent tasks) |
+| `SLURM_EXTRA_ARGS` | extra `sbatch` flags for both submissions, e.g. `"-w lisa"` |
 
 Prerequisite: build gem5 + Ramulator2 once (they are git submodules):
 

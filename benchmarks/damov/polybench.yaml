@@ -1,0 +1,35 @@
+# DAMOV2 descriptor for DAMOV suite 'polybench', migrated from DAMOV
+# command file(s) polybench_cf (biopim/damov@4d611a5) by
+# scripts/migrate_damov.py. {threads} expands to the simulated core count of
+# each job (DAMOV's THREADS); {root} to the DAMOV2 repository root.
+#
+# Binaries must be rebuilt against hooks/compat/zsim_hooks.h (or ported to
+# hooks/damov_hooks.h): ZSim-instrumented builds never trigger the gem5 ROI.
+# See docs/migrating-from-damov.md.
+
+suite: "polybench"
+functions:
+  - name: "linear-algebra_3mm"    # polybench_cf:1, DAMOV stats polybench_linear-algebra_3mm
+    binary: "{root}/workloads/PolyBench-ACC/OpenMP/compiled/3mm"
+    options: ""
+  - name: "linear-algebra_doitgen"    # polybench_cf:2, DAMOV stats polybench_linear-algebra_doitgen
+    binary: "{root}/workloads/PolyBench-ACC/OpenMP/compiled/doitgen"
+    options: ""
+  - name: "linear-algebra_gemm"    # polybench_cf:3, DAMOV stats polybench_linear-algebra_gemm
+    binary: "{root}/workloads/PolyBench-ACC/OpenMP/compiled/gemm"
+    options: ""
+  - name: "linear-algebra_gemver"    # polybench_cf:4, DAMOV stats polybench_linear-algebra_gemver
+    binary: "{root}/workloads/PolyBench-ACC/OpenMP/compiled/gemver"
+    options: ""
+  - name: "linear-algebra_symm"    # polybench_cf:5, DAMOV stats polybench_linear-algebra_symm
+    binary: "{root}/workloads/PolyBench-ACC/OpenMP/compiled/symm"
+    options: ""
+  - name: "linear-algebra_gramschmidt"    # polybench_cf:6, DAMOV stats polybench_linear-algebra_gramschmidt
+    binary: "{root}/workloads/PolyBench-ACC/OpenMP/compiled/gramschmidt"
+    options: ""
+  - name: "stencil_convolution-2d"    # polybench_cf:7, DAMOV stats polybench_stencil_convolution-2d
+    binary: "{root}/workloads/PolyBench-ACC/OpenMP/compiled/convolution-2d"
+    options: ""
+  - name: "stencil_fdtd-apml"    # polybench_cf:8, DAMOV stats polybench_stencil_fdtd-apml
+    binary: "{root}/workloads/PolyBench-ACC/OpenMP/compiled/fdtd-apml"
+    options: ""

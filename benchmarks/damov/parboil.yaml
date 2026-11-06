@@ -1,0 +1,32 @@
+# DAMOV2 descriptor for DAMOV suite 'parboil', migrated from DAMOV
+# command file(s) parboil_cf (biopim/damov@4d611a5) by
+# scripts/migrate_damov.py. {threads} expands to the simulated core count of
+# each job (DAMOV's THREADS); {root} to the DAMOV2 repository root.
+#
+# Binaries must be rebuilt against hooks/compat/zsim_hooks.h (or ported to
+# hooks/damov_hooks.h): ZSim-instrumented builds never trigger the gem5 ROI.
+# See docs/migrating-from-damov.md.
+
+suite: "parboil"
+functions:
+  - name: "Stencil_Stencil"    # parboil_cf:1, DAMOV stats parboil_Stencil_Stencil
+    binary: "{root}/workloads/parboil/benchmarks/stencil/build/omp_base_default/stencil"
+    options: "-i {root}/workloads/parboil/datasets/stencil/default/input/512x512x64x100.bin -- 512 512 64 100 {threads}"
+  - name: "BFS_bfs_sf"    # parboil_cf:2, DAMOV stats parboil_BFS_bfs_sf
+    binary: "{root}/workloads/parboil/benchmarks/bfs/build/omp_base_default/bfs"
+    options: "-i {root}/workloads/parboil/datasets/bfs/SF/input/graph_input.dat -- {threads}"
+  - name: "BFS_bfs_1M"    # parboil_cf:3, DAMOV stats parboil_BFS_bfs_1M
+    binary: "{root}/workloads/parboil/benchmarks/bfs/build/omp_base_default/bfs"
+    options: "-i {root}/workloads/parboil/datasets/bfs/1M/input/graph_input.dat -- {threads}"
+  - name: "BFS_bfs_NY"    # parboil_cf:4, DAMOV stats parboil_BFS_bfs_NY
+    binary: "{root}/workloads/parboil/benchmarks/bfs/build/omp_base_default/bfs"
+    options: "-i {root}/workloads/parboil/datasets/bfs/NY/input/graph_input.dat -- {threads}"
+  - name: "BFS_bfs_ut"    # parboil_cf:5, DAMOV stats parboil_BFS_bfs_ut
+    binary: "{root}/workloads/parboil/benchmarks/bfs/build/omp_base_default/bfs"
+    options: "-i {root}/workloads/parboil/datasets/bfs/UT/input/graph_input.dat -- {threads}"
+  - name: "MRI_mri-gridding"    # parboil_cf:6, DAMOV stats parboil_MRI_mri-gridding
+    binary: "{root}/workloads/parboil/benchmarks/mri-gridding/build/omp_base_default/mri-gridding"
+    options: "-i {root}/workloads/parboil/datasets/mri-gridding/small/input/small.uks -- 32 0 {threads}"
+  - name: "TPACF_tpacf"    # parboil_cf:7, DAMOV stats parboil_TPACF_tpacf
+    binary: "{root}/workloads/parboil/benchmarks/tpacf/run/scripts/{threads}_Core"
+    options: ""

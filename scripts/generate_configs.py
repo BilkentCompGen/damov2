@@ -6,6 +6,13 @@ Replaces the original DAMOV `generate_config_files.py`. Instead of emitting ZSim
 {function} x {config} x {cores} scaling jobs plus one Step-2 trace job per
 function. `run_experiment.py` executes the plan against gem5 + Ramulator2.
 
+Descriptor strings (`binary`, `options`, `input`) may contain two placeholders,
+expanded per job so one descriptor entry covers the whole core sweep:
+
+  {threads}  the job's simulated core count (1 for the Step-2 trace job);
+             the DAMOV command-file `THREADS` token maps onto this
+  {root}     the absolute DAMOV2 repository root
+
 Usage:
   scripts/generate_configs.py --descriptor benchmarks/stream.yaml [--config configs/damov.yaml]
                               [--out out/stream/plan.json]
@@ -15,6 +22,13 @@ import json
 import os
 
 import damov_common as dc
+
+
+def expand(value, cores):
+    """Substitute the descriptor placeholders for one job. Plain str.replace,
+    not str.format, so literal braces in workload arguments survive."""
+    return (str(value).replace("{threads}", str(cores))
+                      .replace("{root}", dc.REPO_ROOT))
 
 
 def build_plan(cfg, desc):
@@ -30,7 +44,8 @@ def build_plan(cfg, desc):
         jobs.append({
             "stage": "trace", "suite": suite, "function": name,
             "config": "host_ooo", "cores": 1, "cpu_type": cfg["cpu_type"],
-            "binary": binary, "options": options, "input": inp,
+            "binary": expand(binary, 1), "options": expand(options, 1),
+            "input": expand(inp, 1),
             "output_dir": dc.out_dir(cfg, suite, name, trace=True),
         })
 
@@ -40,7 +55,9 @@ def build_plan(cfg, desc):
                 jobs.append({
                     "stage": "scale", "suite": suite, "function": name,
                     "config": config, "cores": cores, "cpu_type": cfg["cpu_type"],
-                    "binary": binary, "options": options, "input": inp,
+                    "binary": expand(binary, cores),
+                    "options": expand(options, cores),
+                    "input": expand(inp, cores),
                     "output_dir": dc.out_dir(cfg, suite, name, config, cores),
                 })
     return {"suite": suite, "jobs": jobs}
