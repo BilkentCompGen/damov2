@@ -55,7 +55,7 @@ RUN git config --global --add safe.directory '*' \
 # Tier A — DAMOV2 C++ tools, gated by the unit tests.
 RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
     && cmake --build build -j"${JOBS}" \
-    && ctest --test-dir build --output-on-failure
+    && (cd build && ctest --output-on-failure)
 
 # Tier B + C — Ramulator2 (libramulator.so) and gem5 (gem5.opt), wired together.
 RUN scripts/setup_gem5_ramulator2.sh "${ISA}" "${JOBS}"

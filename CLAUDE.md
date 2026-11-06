@@ -20,8 +20,8 @@ Treat that file as the spec: if you change what `damov-locality`,
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
-ctest --test-dir build            # 3 unit tests: locality, classify, metrics
-scripts/smoke_test.sh             # 25 end-to-end checks on examples/hello
+(cd build && ctest)              # 3 unit tests: locality, classify, metrics
+scripts/smoke_test.sh             # 24-25 end-to-end checks on examples/hello
 ```
 
 `scripts/smoke_test.sh` is the integration test: it drives the hello-world
@@ -31,7 +31,11 @@ prerequisite is missing, so it works without gem5 — prefer it over ad-hoc
 verification after touching anything in the pipeline. [INSTALL.md](INSTALL.md)
 records which prerequisites each tier needs and how to uninstall them.
 
-C++17, CMake ≥ 3.16, `-Wall -Wextra`. No external C++ dependencies. Tests are
+C++17, CMake ≥ 3.16, `-Wall -Wextra`. No external C++ dependencies. Don't use
+`ctest --test-dir`: it needs CMake 3.20, and older ctest silently runs zero
+tests and succeeds. Tested toolchain floors are in the README's "Minimum
+versions" table (Ramulator2 needs g++ ≥ 10, not 12; gem5 v25.1 supports GCC
+11–14.2). Tests are
 plain assert-based binaries (helpers in [tests/test_util.hpp](tests/test_util.hpp))
 registered with CTest — a new test file must be added manually to
 [tests/CMakeLists.txt](tests/CMakeLists.txt).

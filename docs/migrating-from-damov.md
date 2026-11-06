@@ -242,7 +242,9 @@ switch it to `#include "damov_hooks.h"` and the `damov_*` names.
 | all of the above | `scripts/damov2_pipeline.py --descriptor benchmarks/damov/stream.yaml --config configs/damov_migrated_ooo.yaml` |
 
 Add `--dry-run` to `run_experiment.py` or the pipeline to print the gem5
-command lines without running them.
+command lines without running them. Add `--jobs N` to run N gem5 processes at
+once on one machine. Each gem5 process uses one host core, so the limit is host
+memory, not cores. On SLURM, the array job already runs one simulation per task.
 
 ### SLURM
 

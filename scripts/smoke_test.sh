@@ -14,6 +14,8 @@
 # Usage:
 #   scripts/smoke_test.sh            # run everything available
 #   scripts/smoke_test.sh --keep     # keep the out/hello tree for inspection
+#   DAMOV2_SMOKE_JOBS=24 scripts/smoke_test.sh   # run the 24 gem5 sweep jobs in
+#                                    # parallel (needs host RAM for all of them)
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -60,10 +62,12 @@ else
     fail "build failed — run: cmake -S . -B build && cmake --build build"
     printf "\nCannot continue without the tools.\n"; exit 1
 fi
-if ctest --test-dir build --output-on-failure >/dev/null 2>&1; then
+# Run ctest from inside build/: `ctest --test-dir` needs CMake 3.20, and older
+# ctest ignores the flag, finds no tests in the cwd and exits 0 (a false PASS).
+if (cd build && ctest --output-on-failure) >/dev/null 2>&1; then
     pass "unit tests (locality, classify, metrics)"
 else
-    fail "unit tests — run: ctest --test-dir build --output-on-failure"
+    fail "unit tests — run: (cd build && ctest --output-on-failure)"
 fi
 
 # --------------------------------------------------------------------------- #
@@ -150,7 +154,7 @@ GEM5_BIN="${DAMOV2_GEM5_BIN:-external/gem5/build/X86/gem5.opt}"
 if [[ -x "$GEM5_BIN" ]]; then
     python3 scripts/generate_configs.py --descriptor benchmarks/hello.yaml >/dev/null \
       && python3 scripts/run_experiment.py --plan out/hello/plan.json --stage scale \
-             --continue-on-error >/dev/null 2>&1 \
+             --continue-on-error --jobs "${DAMOV2_SMOKE_JOBS:-1}" >/dev/null 2>&1 \
       && pass "gem5 sweep executed [REAL]" || fail "gem5 sweep failed [REAL]"
 else
     skip "gem5 not built ($GEM5_BIN) — using the modeled stand-in below [MODEL]"

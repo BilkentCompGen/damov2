@@ -104,9 +104,30 @@ damov2/
 
 ## Dependencies
 
-Everything DAMOV2 needs is in the standard Ubuntu/Debian archives. Package names
-and versions below are verified against **Ubuntu 24.04**; they are the same on
-Debian 12 and on 22.04 except where noted.
+Everything DAMOV2 needs is in the standard Ubuntu/Debian archives. The package
+list below was verified on **Ubuntu 24.04** (development machine) and **Ubuntu
+22.04** (full gem5 + Ramulator2 build on the alkanlab cluster, with the stock
+g++ 11). The versions those releases ship are not requirements: see
+[Minimum versions](#minimum-versions) for the actual floors.
+
+### Minimum versions
+
+Tested floors, not just the versions on the development machine. "Declared"
+means the component's own build files enforce it.
+
+| Component | Needs | Basis |
+|-----------|-------|-------|
+| DAMOV2 C++ tools | C++17 compiler: g++ ≥ 7 (language features only) | builds and passes ctest with g++ 8, 9, 10, 11, 13; g++ 7 is untested |
+| DAMOV2 build | CMake ≥ 3.16 | declared (`cmake_minimum_required`); builds with 3.16.3 |
+| DAMOV2 scripts | Python ≥ 3.7 | `subprocess.run(capture_output=, text=)` |
+| Ramulator2 | C++20 with concepts: **g++ ≥ 10**; CMake ≥ 3.14 | g++ 8 fails (`requires`); compiles with g++ 10 and runs with g++ 11. CMake floor declared |
+| gem5 v25.1 | GCC 11–14.2 or Clang ≥ 14; SCons ≥ 3.0; Python ≥ 3.6 (embedded) | declared in gem5's `SConstruct` (other compilers only warn) |
+
+In practice gem5 sets the floor: it officially supports **g++ ≥ 11**, and older
+compilers get a warning rather than an error (and are untested here). g++ 11 is
+the default on 22.04, and 24.04 ships 13. On 20.04 (g++ 9) the DAMOV2 tools
+build with the default compiler, but Ramulator2 needs at least `g++-10` and gem5
+officially needs `g++-11`.
 
 ### Install everything at once
 
@@ -132,7 +153,7 @@ Ramulator2 DRAM simulation all work with tier A + B.
 |---------|-----|
 | `build-essential` | gcc/g++ and make. Needs C++17 (g++ ≥ 7) |
 | `cmake` | build system; DAMOV2 requires ≥ 3.16 |
-| `python3` | the `scripts/` orchestration layer |
+| `python3` | the `scripts/` orchestration layer; ≥ 3.7 |
 | `python3-yaml` | *optional* — PyYAML; without it a built-in fallback parser handles the config subset |
 | `gzip` | `damov-locality` reads `.gz` traces by shelling out to `gzip -dc` |
 | `git` | fetching the simulator submodules |
@@ -143,7 +164,7 @@ Ramulator2 DRAM simulation all work with tier A + B.
 | Package | Why |
 |---------|-----|
 | `python3-dev` | CPython headers for Ramulator2's nanobind Python bindings |
-| `cmake` ≥ 3.14, g++ ≥ 12 | Ramulator2 is C++20. `build-essential` gives g++ 13 on 24.04; on 22.04 add `g++-12` and pass `-DCMAKE_CXX_COMPILER=g++-12` |
+| `cmake` ≥ 3.14, g++ ≥ 10 | Ramulator2 is C++20 and uses concepts, so g++ 8/9 fail. The stock compiler on 22.04 (11) and 24.04 (13) works. Pick another with `-DCMAKE_CXX_COMPILER=g++-N` |
 
 Ramulator2 downloads yaml-cpp, fmt and nanobind itself via CMake `FetchContent`,
 so no apt packages are needed for those — but **the configure step needs network
@@ -153,7 +174,8 @@ access**.
 
 | Package | Why |
 |---------|-----|
-| `scons` | gem5's build system |
+| `build-essential` (g++) | gem5 v25.1 supports GCC 11–14.2 (Clang ≥ 14) and warns outside that range |
+| `scons` | gem5's build system (≥ 3.0) |
 | `m4` | **fatal if missing**, and absent from gem5's own documented list |
 | `pkg-config` | locating gem5's link-time dependencies |
 | `protobuf-compiler`, `libprotobuf-dev`, `libprotoc-dev` | gem5's protobuf trace support — required for `CommMonitor` trace dumping, i.e. Step 2 |
@@ -161,7 +183,7 @@ access**.
 | `python3-venv` | gem5's build creates a virtualenv for its Python deps |
 | `zlib1g-dev` | compressed stats and traces |
 | `libboost-all-dev` | gem5 C++ dependencies |
-| `libhdf5-dev` | optional HDF5 stats output. On releases before 24.04 this is `libhdf5-serial-dev` |
+| `libhdf5-dev` | optional HDF5 stats output (the package name is `libhdf5-dev` on both 22.04 and 24.04) |
 | `libpng-dev` | framebuffer image output |
 | `libelf-dev` | ELF loading in SE mode |
 | `libcapstone-dev` | instruction disassembly in traces |
@@ -202,7 +224,7 @@ full prerequisite list per tier (and how to remove it all again).
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
-ctest --test-dir build          # run unit tests
+(cd build && ctest)             # run unit tests
 ```
 
 ## Checking that it works
@@ -344,7 +366,7 @@ python scripts/damov2_pipeline.py --descriptor benchmarks/stream.yaml
 # …or run the stages by hand:
 python scripts/generate_configs.py --descriptor benchmarks/stream.yaml
 python scripts/run_experiment.py   --plan out/stream/plan.json --stage trace
-python scripts/run_experiment.py   --plan out/stream/plan.json --stage scale
+python scripts/run_experiment.py   --plan out/stream/plan.json --stage scale --jobs 16  # 16 gem5 runs at once
 python scripts/collect_stats.py    --suite stream --function Add
 build/damov-classify --metrics out/stream/Add.metrics.csv \
        --locality out/stream/Add.locality.csv --pretty

@@ -33,6 +33,8 @@ def main():
     ap.add_argument("--descriptor", required=True)
     ap.add_argument("--config", default=None)
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--jobs", "-j", type=int, default=1,
+                    help="gem5 processes to run concurrently (run_experiment --jobs)")
     ap.add_argument("--skip-sim", action="store_true",
                     help="reuse existing gem5 outputs; only collect + classify")
     args = ap.parse_args()
@@ -59,7 +61,7 @@ def main():
         for stage in ("trace", "scale"):
             rc = run([sys.executable, os.path.join(here, "run_experiment.py"),
                       "--plan", plan_path, "--stage", stage,
-                      "--continue-on-error"] + cfg_opt
+                      "--continue-on-error", "--jobs", str(args.jobs)] + cfg_opt
                      + (["--dry-run"] if args.dry_run else []),
                      dry=False)
             if rc != 0 and not args.dry_run:

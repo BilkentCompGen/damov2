@@ -12,7 +12,7 @@ actually installed *here* and how to undo it.
 Verify what currently works at any time with:
 
 ```bash
-scripts/smoke_test.sh        # 25 checks; skips (not fails) on missing prereqs
+scripts/smoke_test.sh        # 24-25 checks (24 with gem5); skips (not fails) on missing prereqs
 ```
 
 ---
@@ -64,7 +64,7 @@ Already satisfied here. On a bare machine:
 ```bash
 sudo apt install build-essential cmake python3 python3-yaml
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -j
-ctest --test-dir build
+(cd build && ctest)
 ```
 
 `python3-yaml` (PyYAML) is **optional** — `scripts/damov_common.py` falls back
